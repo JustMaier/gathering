@@ -10,7 +10,18 @@
       "prefix": "app",
       "schematics": {
         "@schematics/angular:component": {
-          "style": "sass"
+          "style": "sass",
+          "spec": false
+        },
+        "@schematics/angular:directive": {
+          "styleext": "scss",
+          "spec": false
+        },
+        "@schematics/angular:pipe": {
+          "spec": false
+        },
+        "@schematics/angular:service": {
+          "spec": false
         }
       },
       "architect": {
@@ -56,17 +67,30 @@
                   "maximumError": "5mb"
                 }
               ]
+            },
+            "hmr": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.hmr.ts"
+                }
+              ]
             }
           }
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "gathering:build"
+			"browserTarget": "gathering:build",
+			"port": 1337
           },
           "configurations": {
             "production": {
               "browserTarget": "gathering:build:production"
+            },
+            "hmr": {
+              "hmr": true,
+              "browserTarget": "gathering:build:hmr"
             }
           }
         },

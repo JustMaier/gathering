@@ -1,0 +1,24 @@
+﻿#cookieConsent {
+	position: fixed;
+	bottom: 15px;
+	width: calc(100% - 40px);
+	max-width: ($container-size - 40px);
+	padding: 10px 15px;
+	line-height: 1.1;
+	border-radius: 5px;
+	background: rgba(lighten($bg, 5%), .95);
+	box-shadow: 0 2px 5px rgba(#000, .3);
+	border: 1px solid rgba(#fff, .05);
+	font-size: .875em;
+	display: flex;
+	align-items: center;
+
+	p {
+		/*color:$text-muted;*/
+		margin: 0;
+	}
+
+	button {
+		margin-left: auto;
+	}
+}

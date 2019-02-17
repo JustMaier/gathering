@@ -1,0 +1,101 @@
+﻿// Spacing
+//
+// Control the default styling of most Bootstrap elements by modifying these
+// variables. Mostly focused on spacing.
+// You can add more entries to the $spacers map, should you need more variation.
+
+$spacer: 1rem !default;
+$spacers: () !default;
+$spacers: map-merge(
+  (
+    0: 0,
+    1: ($spacer * .25),
+    2: ($spacer * .5),
+    3: $spacer,
+    4: ($spacer * 1.5),
+    5: ($spacer * 3)
+  ),
+  $spacers
+);
+
+@each $prop, $abbrev in (margin: m, padding: p) {
+	@each $size, $length in $spacers {
+		.#{$abbrev}-#{$size} {
+			#{$prop}: $length !important;
+		}
+
+		.#{$abbrev}t-#{$size},
+		.#{$abbrev}y-#{$size} {
+			#{$prop}-top: $length !important;
+		}
+
+		.#{$abbrev}r-#{$size},
+		.#{$abbrev}x-#{$size} {
+			#{$prop}-right: $length !important;
+		}
+
+		.#{$abbrev}b-#{$size},
+		.#{$abbrev}y-#{$size} {
+			#{$prop}-bottom: $length !important;
+		}
+
+		.#{$abbrev}l-#{$size},
+		.#{$abbrev}x-#{$size} {
+			#{$prop}-left: $length !important;
+		}
+	}
+}
+
+// Negative margins (e.g., where `.mb-n1` is negative version of `.mb-1`)
+@each $size, $length in $spacers {
+	@if $size != 0 {
+		.m-n#{$size} {
+			margin: -$length !important;
+		}
+
+		.mt-n#{$size},
+		.my-n#{$size} {
+			margin-top: -$length !important;
+		}
+
+		.mr-n#{$size},
+		.mx-n#{$size} {
+			margin-right: -$length !important;
+		}
+
+		.mb-n#{$size},
+		.my-n#{$size} {
+			margin-bottom: -$length !important;
+		}
+
+		.ml-n#{$size},
+		.mx-n#{$size} {
+			margin-left: -$length !important;
+		}
+	}
+}
+
+// Some special margin utils
+.m-auto {
+	margin: auto !important;
+}
+
+.mt-auto,
+.my-auto {
+	margin-top: auto !important;
+}
+
+.mr-auto,
+.mx-auto {
+	margin-right: auto !important;
+}
+
+.mb-auto,
+.my-auto {
+	margin-bottom: auto !important;
+}
+
+.ml-auto,
+.mx-auto {
+	margin-left: auto !important;
+}

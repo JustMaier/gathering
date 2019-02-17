@@ -1,0 +1,53 @@
+﻿.btn {
+	background: $brand-primary;
+	color: #fff;
+	display: inline-block;
+	line-height: 1;
+	padding: 15px 12px;
+	border-radius: 5px;
+	cursor: pointer;
+	border: none;
+	box-shadow: 0px 1px 5px rgba(#000, .3);
+
+	&:hover, &:focus, &:active {
+		background: darken($brand-primary, 5%);
+		outline: none;
+	}
+
+	&.btn-sm {
+		padding: 6px 10px;
+	}
+
+	&.btn-lg {
+		padding: 18px 20px;
+		font-size: 2em;
+		font-weight: 300;
+	}
+
+	&.btn-block {
+		display: block;
+		width: 100%;
+		text-align: center;
+	}
+
+	&.btn-uport {
+		padding: 10px 12px 6px;
+
+		svg {
+			max-height: 32px;
+			fill: #fff;
+			max-width: 100%;
+		}
+	}
+
+	&.btn-text {
+		background: none;
+		box-shadow: none;
+	}
+
+	i {
+		font-size: 24px;
+		line-height:20px;
+		vertical-align: middle;
+	}
+}

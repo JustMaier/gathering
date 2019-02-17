@@ -1,0 +1,8 @@
+<h1>Gatherings</h1>
+<div class="list">
+    <a class="list-item" *ngFor="let gathering of (gatherings)">
+      <i class="icon-right"></i>
+      {{gathering.name}}
+    </a>
+    <a class="list-item" [routerLink]="'/join'"><i class="icon-add"></i> Join New</a>
+</div>

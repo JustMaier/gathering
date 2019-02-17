@@ -1,0 +1,20 @@
+﻿//////////////////////////////////////////////
+// Colors
+/////////////////////////////////////////////
+$brand-primary: #5c50ca;
+$brand-secondary: #fc5090;
+$brand-success: #2ecc71;
+$brand-danger: #e74c3c;
+$gray: #ddd;
+
+$bg: #333;
+$text-color: #fff;
+$text-muted: darken(#fff,30%);
+$header-color: lighten($brand-primary, 0%);
+$link-color: $brand-secondary;
+
+//////////////////////////////////////////////
+// Sizes
+/////////////////////////////////////////////
+$gutter: 20px;
+$container-size: 400px;

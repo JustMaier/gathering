@@ -1,0 +1,10 @@
+<nav [ngClass]="{'active': toggled}">
+	<a asp-area="" asp-controller="Home" asp-action="Index" class="logo" (click)="toggleMenu()">
+		<svg viewBox="0 0 56.42 11"><use xlink:href="/assets/images/gthrng.svg#logo"></use></svg>
+	</a>
+	<div class="menu">
+		<a [routerLink]="'/'">My Gatherings</a>
+		<a [routerLink]="'/me'">Me</a>
+		<a [routerLink]="'/rankings'">Rankings</a>
+	</div>
+</nav>

@@ -1,0 +1,30 @@
+﻿.contact-header {
+	display: grid;
+	grid-template-rows: auto auto;
+	grid-template-columns: 1fr 50px;
+	grid-template-areas:
+		"name btn"
+		"company .";
+	margin:$gutter 0;
+
+	h1 {
+		grid-area: name;
+		margin: 0;
+		line-height: 1;
+	}
+
+	p {
+		grid-area: company;
+		line-height: 1;
+		margin: 0;
+		color: $text-muted;
+		text-shadow:0 -1px rgba(#000, .5);
+	}
+
+	.btn{
+		grid-area:btn;
+		align-self:center;
+		justify-self:flex-end;
+		text-align:center;
+	}
+}

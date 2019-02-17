@@ -1,0 +1,111 @@
+﻿$list-border: lighten($bg, 10%) !default;
+$list-bg: lighten($bg, 2%) !default;
+$list-hover: lighten($bg, 5%) !default;
+
+.contacts {
+	border: 1px solid $list-border;
+	border-radius: 5px;
+	overflow: hidden;
+	background: rgba($list-bg,.8);
+	box-shadow: 0px 1px 5px rgba(#000, .3);
+
+	&-item {
+		display: grid;
+		grid-gap: 0px 10px;
+		grid-template-rows: auto;
+		grid-template-columns: 60px auto 60px;
+		line-height: 1;
+		grid-template-areas: "img details status";
+		align-items: center;
+		color: inherit;
+		/*font-size: .875em;*/
+
+		&:hover, &:active, &:focus {
+			background: $list-hover;
+		}
+
+		& + #{&} {
+			border-top: 1px solid $list-border;
+		}
+
+		.img {
+			grid-area: img;
+			padding: 3px;
+			display: block;
+
+			img {
+				border-radius: 4px;
+			}
+		}
+
+		&-details {
+			grid-area: details;
+		}
+
+		&-status {
+			grid-area: status;
+			justify-self: center;
+			font-size: .75em;
+			display: flex;
+			justify-content: center;
+			flex-direction: row;
+			align-items: center;
+			color:$text-muted;
+
+			i {
+				font-size: 2em;
+				display: block;
+				text-align: center;
+				color: lighten($brand-primary, 20%);
+				margin-bottom:2px; 
+			}
+		}
+
+		&-name {
+			display: block;
+			font-size: 1.15em;
+			font-weight: 500;
+		}
+
+		&-company {
+			display: block;
+			color: $text-muted;
+		}
+	}
+}
+
+
+.info, .list {
+	border: 1px solid $list-border;
+	border-radius: 5px;
+	overflow: hidden;
+	background: rgba($list-bg,.8);
+	margin: 20px 0;
+	box-shadow: 0px 1px 5px rgba(#000, .3);
+
+	&-item {
+		display: grid;
+		grid-template-columns: 50px 1fr;
+		grid-template-rows: 50px;
+		grid-template-areas: "icon content";
+		align-items: center;
+		font-size: 1em;
+		font-weight: 300;
+		color: inherit;
+
+		&:hover, &:active, &:focus {
+			background: $list-hover;
+		}
+
+		& + #{&} {
+			border-top: 1px solid $list-border;
+		}
+
+		i {
+			grid-area: icon;
+			font-size: 24px;
+			justify-self: center;
+			color: $brand-primary;
+		}
+	}
+}
