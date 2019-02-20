@@ -26,13 +26,17 @@ export default class AttendeeNode {
 	}
 
 	joinGathering(gatheringName: string) {
-		this.storage.activateGathering(gatheringName);
+		// I'm still a little unclear about how the activateGathering action might work for the second person to join.
+    // Would he or she have the same option to re-set the gathering name, or is this something you would 
+    // limit from the front end interface?  Or does setting a new name create a new gathering?
+    this.storage.activateGathering(gatheringName);
 		this.codename = this.storage.getCodename();
 		this.hash = hash({
 			gathering: this.gathering,
 			codename: this.codename
 		});
 		this.gathering = gatheringName;
+    // Should we create the affinities options for the gathering here? 
 		this.node.pubsub.subscribe(gatheringName, () => {
 			// TODO listen for score stuff
 		});
@@ -267,12 +271,18 @@ export default class AttendeeNode {
 		// Add to contact
 		const contact = this.storage.getContact(peerId);
 		contact.stars++;
+    // do we need to decrement the sender's star balance here? not sure exactly how to do that, as I don't see where they are minted
 		this.storage.save();
 
 		// Announce the stars
 		this.announceForScoreKeeper({
 			from: this.hash,
 			to: contact.hash,
+      // I think the scorekeepers might already have the recommender info, but it's possible that the 
+      // same match could have been recommended by two different people, so we might want to track 
+      // and report the first one to make it.  Or we could prevent redundant recommendations, which might be better
+      // from a UX perspective, rather than have users upset that their unknowingly duplicative recommendation didn't count
+      recommender: fromContact.hash
 			star: contact.stars
 		});
 	}
