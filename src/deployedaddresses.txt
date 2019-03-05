@@ -1,0 +1,6 @@
+// Deployed addresses for GatherStandardTrophies.sol ERC721 contract
+
+Rinkeby_Address: 0xb03cc3b8e54d09191e09080fa8746d5a4283cfef
+https://rinkeby.etherscan.io/address/0xb03cc3b8e54d09191e09080fa8746d5a4283cfef
+
+* Gather Standard Trophies 03.05.19 (GST3519) - solc ^0.5.5 optimized - deployed from remix as "GST"
