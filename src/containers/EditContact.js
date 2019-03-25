@@ -1,31 +1,20 @@
-import React, { Component } from 'react'
-import { connect } from 'react-redux'
-import { updateContact } from '../store/actions/contacts'
+import React from 'react';
 import ContactForm from '../components/ContactForm';
+import { useGatheringContext } from '../contexts';
 
-export class EditContact extends Component {
+export const EditContact = ({ history }) => {
+  const { gathering, actions } = useGatheringContext();
 
-  finished = (data) => {
-    this.props.updateContact(data);
-    this.props.history.push('/');
+  const finished = (data) => {
+    actions.updateContact(data);
+    history.push('/');
   }
 
-  render() {
-    const { contact } = this.props;
-    return (
-      <React.Fragment>
-        <ContactForm data={contact} onFinished={this.finished}></ContactForm>
-      </React.Fragment>
-    )
-  }
+  return (
+    <React.Fragment>
+      <ContactForm data={gathering.contact} onFinished={finished}></ContactForm>
+    </React.Fragment>
+  )
 }
 
-const mapStateToProps = (state) => ({
-  contact: state.contacts.contacts.find(x=>x.id === state.gatherings.activeGathering.contactId)
-})
-
-const mapDispatchToProps = {
-  updateContact
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(EditContact)
+export default EditContact

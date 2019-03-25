@@ -9,7 +9,7 @@ const ListItem = Styled.button`
   }
 `;
 
-export const ContactListItem = ({id, name, codename, onSelect = null}) => {
+export const ContactListItem = ({id, name, status, onSelect = null}) => {
   const content = <React.Fragment>{name}</React.Fragment>;
   return !onSelect ? (
     <ListItem as={Link} to={'/contacts/' + id}>{content}</ListItem>

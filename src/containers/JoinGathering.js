@@ -1,53 +1,33 @@
 import React, {useState, useEffect} from 'react';
-import {connect} from 'react-redux';
 import queryString from 'query-string';
 import ContactForm from '../components/ContactForm';
 import GatheringForm from '../components/GatheringForm';
-import {
-  createGathering,
-  joinGathering,
-  activateGathering
-} from '../store/actions/gatherings';
+import { useGatheringContext } from '../contexts';
 
-const JoinGathering = props => {
+const JoinGathering = ({location}) => {
+  const { actions } = useGatheringContext();
   const [gathering, setGathering] = useState({});
-  const [contact, setContact] = useState({});
-
-  const joinGathering = async () => {
-    const method = (gathering.id ? 'join' : 'create') + 'Gathering';
-    const {id: gatheringId} = await props[method](gathering, contact);
-    props.activateGathering(gatheringId);
-  };
 
   // Check the query string to see if we already have a gathering
   useEffect(() => {
-    const qs = queryString.parse(props.location.search);
+    const qs = queryString.parse(location.search);
     if (qs.id) setGathering(qs);
   }, []);
-  useEffect(() => {
-    if (contact.name) joinGathering();
-  }, [contact]);
+
+  const joinGathering = async (contact) => {
+    const gatheringId = await actions.addGathering(gathering, contact);
+    await actions.activate(gatheringId);
+  }
 
   return (
     <React.Fragment>
       {!gathering.name ? (
-        <GatheringForm onFinished={data => setGathering(data)} />
+        <GatheringForm onFinished={setGathering} />
       ) : (
-        <ContactForm onFinished={data => setContact(data)} />
+        <ContactForm onFinished={joinGathering} />
       )}
     </React.Fragment>
   );
 };
 
-const mapStateToProps = state => ({});
-
-const mapDispatchToProps = {
-  createGathering,
-  joinGathering,
-  activateGathering
-};
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(JoinGathering);
+export default JoinGathering;

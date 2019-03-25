@@ -1,30 +1,25 @@
-import React from 'react'
-import { connect } from 'react-redux';
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom';
-import { activateGathering } from '../store/actions/gatherings';
-import { LinkList, LinkListItem } from '../components/UI/LinkList';
-import Button from '../components/UI/Button';
+import { ListGroup, ListGroupItem } from '../components/UI';
+import db from '../db'
+import { useGatheringContext } from '../contexts'
 
 
-
-const Gatherings = ({gatherings, activateGathering}) => {
-  let gatheringsList = null;
-  if(gatherings.length > 0)
-    gatheringsList = <LinkList>{gatherings.map(x=><LinkListItem as="button" key={x.id} onClick={()=>activateGathering(x.id)}>{x.name}</LinkListItem>)}</LinkList>
+const Gatherings = () => {
+  const { actions } = useGatheringContext();
+  const [gatherings, setGatherings] = useState([]);
+  useEffect(() => {
+    db.getGatherings().then(setGatherings)
+  }, []);
 
   return (
     <React.Fragment>
-      {gatheringsList}
-      <Button as={Link} to="/gatherings/create">Create Gathering</Button>
+      <ListGroup>
+        {gatherings.map(x=><ListGroupItem as="button" key={x.id} onClick={()=>actions.activate(x.id)}>{x.name}</ListGroupItem>)}
+        <ListGroupItem as={Link} to="/gatherings/create">Create Gathering</ListGroupItem>
+      </ListGroup>
     </React.Fragment>
   )
 }
 
-const mapStateToProps = state => ({
-  gatherings: state.gatherings.gatherings
-});
-const mapDispatchToProps = {
-  activateGathering: activateGathering
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(Gatherings);
+export default Gatherings;

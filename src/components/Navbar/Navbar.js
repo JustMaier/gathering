@@ -2,7 +2,8 @@ import React from 'react'
 import styled from 'styled-components/macro';
 import { Link } from 'react-router-dom';
 import { rgba } from 'polished';
-import Button from '../UI/Button';
+import { Button } from '../UI';
+import { useGatheringContext } from '../../contexts';
 
 const Nav = styled.nav`
   position: fixed;
@@ -30,7 +31,9 @@ const Logo = styled.a`
   font-size:1.25em;
 `;
 
-const Navbar = ({gathering, deactivateGathering}) => {
+const Navbar = () => {
+  const {gathering, actions} = useGatheringContext();
+
   return (
     <Nav>
       <Logo as={Link} to="/">Gathering</Logo>

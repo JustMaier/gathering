@@ -1,8 +1,8 @@
 import styled from 'styled-components/macro';
 
-export const LinkList = styled.div`
+export const ListGroup = styled.div`
   margin-bottom: 20px;
 `;
-export const LinkListItem = styled.a`
+export const ListGroupItem = styled.a`
   display:block;
 `;

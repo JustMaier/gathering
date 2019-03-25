@@ -1,8 +1,2 @@
-import Contact, { contactFlags } from './Contact';
-import affinities from './enums/affinities';
-
-export {
-  affinities,
-  Contact,
-  contactFlags
-}
+export { default as Contact, contactFlags } from './Contact';
+export { default as Gathering } from './Gathering';

@@ -1,4 +1,3 @@
-import {contactFlags} from './models/Contact';
 import MeshClient from 'simple-mesh-net';
 
 const swapContact = {
@@ -26,7 +25,7 @@ class MeshNet {
   client = null;
   async connect(gathering) {
     this.gathering = gathering;
-    this.client = new MeshClient(gathering.contactId, {
+    this.client = new MeshClient(gathering.contact.id, {
       signalServer: 'ws://localhost:9090'
     });
 
@@ -35,50 +34,34 @@ class MeshNet {
     this.on = this.client.on.bind(this.client);
     this.once = this.client.once.bind(this.client);
     this.off = this.client.off.bind(this.client);
+    this.emit = this.client.emit.bind(this.client);
 
     this.toBind.forEach(({type, handler, as}) => {
       this.client[as](type, handler);
     });
   }
   disconnect() {
-    console.warning('disconnect not implemented');
+    console.log('disconnect not implemented');
+    this.emit('disconnect');
   }
-  async swapContactInfo(codename, myInfo) {
-    const channelParts = [this.gathering.codename.toLowerCase(), codename.toLowerCase()].sort();
+  async swapContactInfo(codename) {
+    const channelParts = [this.gathering.contact.codename.toLowerCase(), codename.toLowerCase()].sort();
     const channel = channelParts.join(':');
     const method =
-      channelParts[0] === this.gathering.codename.toLowerCase() ? 'send' : 'receive';
+      channelParts[0] === this.gathering.contact.codename.toLowerCase() ? 'send' : 'receive';
 
     //TODO listen for failures here
-    const contact = await swapContact[method](channel, myInfo);
+    const contact = await swapContact[method](channel, this.gathering.contact.serialize());
 
-    // publish connection
-    const connection = {
-      gatheringId: this.gathering.id,
-      fromId: this.gathering.contactId,
-      toId: contact.id,
-      flags: 0
-    };
-    this.broadcast('connection', connection);
-
-    return {contact, connection};
+    return contact;
   }
   addStar(contactId) {
     this.broadcast('add-star', contactId);
   }
   async recommendContact(toContactId, contact) {
     // send contact
-    const didntHaveAlready = await this.send(toContactId, 'recommendation', contact);
-    const connection = {
-      gatheringId: this.gathering.id,
-      fromId: toContactId,
-      toId: contact.id,
-      recommenderId: this.gathering.contactId,
-      flags: contactFlags.inactive
-    };
-    if(didntHaveAlready) this.broadcast('connection', connection);
-
-     return {didntHaveAlready, connection};
+    const didntHaveAlready = await this.send(toContactId, 'recommendation', contact.serialize());
+    return didntHaveAlready;
   }
   async announceAwards(awards) {
     // publish current awards
@@ -94,6 +77,7 @@ class MeshNet {
     this.toBind.push({type, handler, as: 'once'});
   }
   off = (type, handler = null) => {}
+  emit = (type, ...args) => {};
   send = async (peerName, type, data, timeout = undefined) => {}
   broadcast = async (type, data, filterFn = null, timeout = undefined) => {}
 }

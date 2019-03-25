@@ -1,87 +1,70 @@
-import React, { Component } from 'react'
-import { connect } from 'react-redux'
-import { recommend, addStar, removeContact } from '../store/actions/contacts';
-import Header from '../components/UI/Header'
-import {LinkList, LinkListItem} from '../components/UI/LinkList';
-import Button from '../components/UI/Button';
+import React, { useState, useEffect } from 'react'
+import {ListGroup, ListGroupItem, Button, Header, Spinner, Stars} from '../components/UI';
 import { saveAs } from 'file-saver';
 import { ContactList, ContactListItem } from '../components/ContactList';
+import { useGatheringContext, useNetworkContext } from '../contexts'
 
-export class Contact extends Component {
-  state = {
-    recommender: null,
-    recommending: false
-  };
+const Contact = ({history, match: { params } }) => {
+  const { gathering, actions } = useGatheringContext();
+  const { peers, actions: networkActions } = useNetworkContext();
+  const [recommending, setRecommending] = useState(false);
+  const [contact, setContact] = useState(null);
+  const [contacts, setContacts] = useState([]);
+  const [recommendations, setRecommendations] = useState({});
 
-  componentDidMount(){
-    const { contact, contacts } = this.props;
-    this.setState({
-      recommender: contact.recommenderId ? contacts.find(x=>x.id === contact.recommenderId) : null
-    });
-  }
+  useEffect(() => {
+    gathering.getContact(params.id).then(setContact)
+  }, [gathering]);
+  useEffect(() => {
+    if(recommending && contacts.length === 0)
+      gathering.getContacts().then(setContacts);
+  }, [gathering, recommending]);
 
-  download = () => {
-    const { contact } = this.props;
+  const download = () => {
     const blob = new Blob([contact.toVCard()], {type:'text/vcard'});
     saveAs(blob, `${contact.name}.vcf`);
   }
-
-  toggleRecommending = () => this.setState(prevState => ({recommending: !prevState.recommending}));
-  delete = () => {
-    const { contact, removeContact, history } = this.props;
-    removeContact(contact.id);
+  const toggleRecommending = () => setRecommending(x=>!x);
+  const deleteContact = () => {
+    actions.removeContact(contact.id);
     history.push('/');
   }
-
-  sendRecommendation = (recommendedContactId) => {
-    const { contact, recommend } = this.props;
-    recommend(contact.id, recommendedContactId);
+  const sendRecommendation = async (recommendedContactId) => {
+    setRecommendations(x=>({...x, [recommendedContactId]: 'sending'}));
+    const recommendedContact = await gathering.getContact(recommendedContactId);
+    await networkActions.recommend(contact.id, recommendedContact);
+    setRecommendations(x=>({...x, [recommendedContactId]: 'sent'}));
   }
 
-  render() {
-    const { contact, contacts, connections, isOnline } = this.props;
-    const { recommender, recommending } = this.state;
+  if(!contact)
+    return <Spinner/>
 
-    return (
-      <div>
-        {recommender && <div>Recommended by {recommender.name}</div>}
-        <span>{isOnline ? 'online' : 'offline'}</span>
-        { contact.stars && <span>{[...Array(contact.stars)].map((_,i) =>
-          <span role="img" aria-label="star" key={i}>⭐</span>)}
-        </span>}
-        <img src={contact.img+'&size=300'} alt={contact.name} />
-        <Header>{contact.name}</Header>
-        <p>{contact.organization}</p>
-        <LinkList>
-          <LinkListItem as="a" href={`mailto:${contact.email}`}>{contact.email}</LinkListItem>
-          <LinkListItem as="a" href={`tel:${contact.phone}`}>{contact.phone}</LinkListItem>
-          <LinkListItem as="div">{contact.location}</LinkListItem>
-          <LinkListItem as="div">{contact.affinities.toString()}</LinkListItem>
-        </LinkList>
-        <Button as="button" block onClick={this.download}>Download</Button>
-        <Button as="button" block onClick={this.toggleRecommending} disabled={!isOnline}>Send Recommendation</Button>
-        <Button as="button" block danger onClick={this.delete}>Delete</Button>
-        {recommending && (
-          <ContactList>
-            {contacts.map(x=><ContactListItem key={x.id} {...x} onSelect={this.sendRecommendation} checked={contact.hasConnection(x.id, connections)} />)}
-          </ContactList>
-        )}
-      </div>
-    )
-  }
+  const isOnline = contact && peers[contact.id];
+
+  return (
+    <div>
+      {contact.recommender && <div>Recommended by {contact.recommender.name}</div>}
+      <span>{isOnline ? 'online' : 'offline'}</span>
+      <Stars count={contact.stars}/>
+      <img src={contact.img+'&size=300'} alt={contact.name} />
+      <Header>{contact.name}</Header>
+      <p>{contact.organization}</p>
+      <ListGroup>
+        <ListGroupItem as="a" href={`mailto:${contact.email}`}>{contact.email}</ListGroupItem>
+        <ListGroupItem as="a" href={`tel:${contact.phone}`}>{contact.phone}</ListGroupItem>
+        <ListGroupItem as="div">{contact.location}</ListGroupItem>
+        <ListGroupItem as="div">{contact.affinities.toString()}</ListGroupItem>
+      </ListGroup>
+      <Button as="button" block onClick={download}>Download</Button>
+      <Button as="button" block onClick={toggleRecommending} disabled={!isOnline}>Send Recommendation</Button>
+      <Button as="button" block danger onClick={deleteContact}>Delete</Button>
+      {recommending && (
+        <ContactList>
+          {contacts.filter(x=>x.id !== contact.id).map(x=><ContactListItem key={x.id} {...x} onSelect={sendRecommendation} status={recommendations[x.id]}/>)}
+        </ContactList>
+      )}
+    </div>
+  )
 }
 
-const mapStateToProps = (state, { match: { params } }) => ({
-  contacts: state.contacts.contacts,
-  connections: state.connections.connections,
-  contact: state.contacts.contacts.find(x=>x.id === params.id),
-  isOnline: state.network.peers.find(x => x.peerName === params.id) != null
-})
-
-const mapDispatchToProps = {
-  recommend,
-  addStar,
-  removeContact
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(Contact)
+export default Contact;

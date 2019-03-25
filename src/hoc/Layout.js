@@ -1,29 +1,14 @@
 import React from 'react'
 import Navbar from '../components/Navbar/Navbar';
-import styled from 'styled-components/macro';
-import { math } from 'polished';
-import { connect } from 'react-redux';
-import { deactivateGathering } from '../store/actions/gatherings';
+import {Main} from '../components/UI';
 
-const Main = styled.main`
-  padding-top: ${p=>math(`${p.theme.gutter} + 45px`)};
-`
-
-const Layout = ({children, gathering, deactivateGathering}) => {
+const Layout = ({children}) => {
   return (
     <React.Fragment>
-      <Navbar gathering={gathering} deactivateGathering={deactivateGathering}/>
+      <Navbar/>
       <Main>{children}</Main>
     </React.Fragment>
   )
 }
 
-const mapStateToProps = (state) => ({
-  gathering: state.gatherings.activeGathering
-});
-
-const mapDispatchToProps = {
-  deactivateGathering
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(Layout);
+export default Layout;

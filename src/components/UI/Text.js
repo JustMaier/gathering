@@ -1,7 +1,7 @@
 import styled from 'styled-components/macro';
 import { rgba } from 'polished';
 
-const Header = styled.h1`
+export const Header = styled.h1`
   font-size: 2.25em;
 	font-weight: 600;
 	margin-bottom: 0.6em;
@@ -10,5 +10,3 @@ const Header = styled.h1`
 	color: ${p=>p.theme.header};
 	text-shadow: 1px 2px 3px ${rgba('#000',0.3)};
 `;
-
-export default Header;

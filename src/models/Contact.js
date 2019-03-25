@@ -1,20 +1,33 @@
 import md5 from 'md5-hash';
-import Flag from '../shared/Flag';
-import { affinities } from './index';
+import Flag from './infrastructure/Flag';
 
 export const contactFlags = {
-  inactive: 1,
-  notify: 2
-};
+  active: 1
+}
 
 export default class Contact {
-  constructor(data) {
+  id;
+  codename;
+  gatheringId;
+  recommenderId;
+  recommender;
+  name;
+  img;
+  organization;
+  email;
+  phone;
+  location;
+  affinities;
+  notes;
+  flags = new Flag(0, contactFlags);
+  stars = 0;
+
+  constructor(data, gathering) {
     Object.assign(this, data);
-    const hash = md5((data.email || '').toLowerCase());
-    this.img = `https://www.gravatar.com/avatar/${hash}?d=identicon`;
-    this.flags = new Flag(data.flags || 0, contactFlags);
-    this.affinities = new Flag(data.affinities || 0, affinities);
+    this.gatheringId = gathering.id;
+    this.deserialize(gathering);
   }
+
   toVCard() {
     return `BEGIN:VCARD
     VERSION:3.0
@@ -25,7 +38,26 @@ export default class Contact {
     UID:${this.id}
     END:VCARD`;
   }
-  hasConnection(contactId, connections) {
-    return connections.find(x=>x.fromId === this.id && x.toId === contactId) !== null;
+
+  serialize(){
+    const serialized = {
+      ...this,
+      flags: this.flags.value,
+      affinities: this.affinities.value
+    };
+    delete serialized.recommender;
+    delete serialized.img;
+    return serialized;
+  }
+
+  deserialize(gathering){
+    this.stars = isNaN(this.stars) ? 0 : this.stars;
+    this.flags = new Flag(this.flags || 0, contactFlags);
+    this.affinities = new Flag(this.affinities || 0, gathering.affinities);
+    if(this.recommender) this.recommender.deserialize(gathering);
+    const hash = md5((this.email || '').toLowerCase());
+    this.img = `https://www.gravatar.com/avatar/${hash}?d=identicon`;
+
+    return this;
   }
 }

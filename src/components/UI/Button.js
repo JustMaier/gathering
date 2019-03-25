@@ -1,7 +1,7 @@
 import styled from 'styled-components/macro';
 import { darken, rgba } from 'polished';
 
-const Button = styled.a`
+export const Button = styled.a`
   background-color: ${p=>p.theme.primary};
   color: #fff;
   display:${p=>p.block ? 'block' : 'inline-block'};
@@ -27,5 +27,3 @@ const Button = styled.a`
 		outline: none;
 	}
 `;
-
-export default Button;

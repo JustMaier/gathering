@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Form, Fieldset, FloatLabelInput } from './UI/Form';
-import Button from './UI/Button';
-import Header from './UI/Header';
+import { Form, Fieldset, FloatLabelInput, Button, Header } from './UI';
 
 const ContactForm = ({onFinished, data = null}) => {
   const [contact, setContact] = useState(data || {name:'', codename: ''});
