@@ -1,11 +1,12 @@
 import React from 'react';
 import styled from 'styled-components/macro';
 import { darken, lighten, rgba } from 'polished';
+import { space } from 'styled-system';
 
 const formStyleVariables = {
-  inputBorder: p => lighten(.1, p.theme.bg),
-  inputBg: p => lighten(.02, p.theme.bg),
-  inputHover: p => lighten(.05, p.theme.bg),
+  inputBorder: p => lighten(.1, p.theme.colors.bg),
+  inputBg: p => lighten(.02, p.theme.colors.bg),
+  inputHover: p => lighten(.05, p.theme.colors.bg),
   inputRadius: p => '5px',
 }
 
@@ -15,9 +16,9 @@ export const Form = styled.form`
 `;
 
 export const Fieldset = styled.fieldset`
+  ${space}
   box-shadow: 0px 1px 5px rgba(#000, .3);
 	border-radius:$input-radius;
-  margin-bottom: ${p=>p.theme.gutter};
 
   & > div {
     input, textarea {
@@ -39,6 +40,10 @@ export const Fieldset = styled.fieldset`
     }
   }
 `;
+
+Fieldset.defaultProps = {
+  mb: '4'
+}
 
 const FormGroup = (props) => (
   <div className={props.className}>
@@ -62,13 +67,13 @@ export const FloatLabelInput = styled(FormGroup)`
 		pointer-events: none;
 		transition: 200ms ease all;
 		z-index: 3;
-		color: ${p=>darken(.3, p.theme.text)};
+		color: ${p=>darken(.3, p.theme.colors.text)};
 
 		&.required {
 			&:after {
 				margin-left: 3px;
 				content: '*';
-				color: ${p=>p.theme.danger};
+				color: ${p=>p.theme.colors.danger};
 			}
 		}
 	}
@@ -89,7 +94,7 @@ export const FloatLabelInput = styled(FormGroup)`
 
 		&:focus {
 			box-shadow: none;
-			border-color: ${p=>p.theme.primary};
+			border-color: ${p=>p.theme.colors.primary};
 			outline: none;
 			z-index: 2;
 		}
@@ -97,7 +102,7 @@ export const FloatLabelInput = styled(FormGroup)`
 		&:focus, &:not(:placeholder-shown) {
 			& ~ label {
 				font-size: 10px;
-				color: ${p=>lighten(.2, p.theme.primary)};
+				color: ${p=>lighten(.2, p.theme.colors.primary)};
 				top: 6px;
 				font-weight: 500;
 				opacity: 1;
@@ -108,11 +113,11 @@ export const FloatLabelInput = styled(FormGroup)`
 			}
 
 			&:invalid ~ label {
-				color: ${p=>p.theme.danger};
+				color: ${p=>p.theme.colors.danger};
 			}
 
 			&:valid ~ label:after {
-				color: ${p=>lighten(.2, p.theme.primary)};
+				color: ${p=>lighten(.2, p.theme.colors.primary)};
 			}
 		}
 	}

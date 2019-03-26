@@ -54,6 +54,15 @@ class GatheringDb extends Dexie {
       this.active = 0;
       return this.save();
     }
+    Gathering.prototype.giveStar = function(contact){
+      if(this.starsRemaining <= 0) return;
+      return db.transaction('rw', db.gatherings, db.contacts, async () => {
+        await db.gatherings.update(this.id, {starsRemaining: this.starsRemaining - 1});
+        await db.contacts.update(contact.id, {stars: contact.stars + 1});
+        this.starsRemaining--;
+        contact.stars++;
+      });
+    }
 
     db.contacts.mapToClass(Contact);
     Contact.prototype.save = function(){

@@ -11,7 +11,7 @@ export const GatheringContextProvider = ({ children }) => {
   useEffect(() => {
     db.getActiveGathering().then(async gathering => {
       setGathering(gathering);
-      await network.connect(gathering);
+      if(gathering) await network.connect(gathering);
       setLoading(false);
     });
   }, [])

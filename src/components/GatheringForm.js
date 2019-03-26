@@ -18,7 +18,7 @@ const GatheringForm = ({onFinished}) => {
 
   return (
     <Form onSubmit={submit}>
-      <Header>Gathering details</Header>
+      <Header mb="2">Gathering details</Header>
       <Fieldset>
         {fields.map(props=><FloatLabelInput value={gathering[props.name]} onChange={setInput} key={props.name} {...props}/>)}
       </Fieldset>

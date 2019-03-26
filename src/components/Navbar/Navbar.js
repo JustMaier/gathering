@@ -2,21 +2,23 @@ import React from 'react'
 import styled from 'styled-components/macro';
 import { Link } from 'react-router-dom';
 import { rgba } from 'polished';
-import { Button } from '../UI';
+import { LinkButton } from '../UI';
 import { useGatheringContext } from '../../contexts';
+import { MdAddCircle } from 'react-icons/md';
 
 const Nav = styled.nav`
   position: fixed;
   width:400px;
   z-index: 100;
   display:flex;
+  align-items:flex-start;
   justify-content: space-between;
 `;
 
 const Logo = styled.a`
   color:#fff;
   text-decoration:none;
-  background: ${p=>p.theme.primary};
+  background: ${p=>p.theme.colors.primary};
   display: block;
   border-radius: 0 0 5px 5px;
   width: 130px;
@@ -37,7 +39,7 @@ const Navbar = () => {
   return (
     <Nav>
       <Logo as={Link} to="/">Gathering</Logo>
-      {gathering && <Button as={Link} to="/connect">Connect</Button>}
+      {gathering && <LinkButton to="/connect" sm borderRadius='0 0 5px 5px'><MdAddCircle size="1.5em"/></LinkButton>}
     </Nav>
   )
 }

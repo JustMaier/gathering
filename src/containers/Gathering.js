@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useGatheringContext } from '../contexts'
-import { Button } from '../components/UI';
+import { Button, Header } from '../components/UI';
 import Me from '../components/Me';
 import { ContactList, ContactListItem } from '../components/ContactList';
 
@@ -14,11 +14,11 @@ const Gathering = () => {
   return (
     <React.Fragment>
       <Me {...gathering.contact} />
-      <ContactList>
+      <Header fontSize="3" mt="5" mb="1">Your contacts</Header>
+      <ContactList mb="4">
         {contacts.map(x=><ContactListItem key={x.id} {...x} />)}
       </ContactList>
       <Button as="button" sm onClick={actions.deactivate}>Close gathering</Button>
-      <Button href={`/gatherings/join?id=${gathering.id}&name=${gathering.name}&end=${gathering.end}`}>Share</Button>
     </React.Fragment>
   )
 }

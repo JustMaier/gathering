@@ -1,10 +1,12 @@
 import React from 'react';
+import {Box} from './Box';
+import {MdStarBorder, MdStar} from 'react-icons/md'
 
 export const Stars = ({count, ...props}) => {
-  if(!count || count === 0) return null;
   return (
-    <span {...props}>{[...Array(count)].map((_,i) =>
-      <span role="img" aria-label="star" key={i}>⭐</span>)}
-    </span>
+    <Box {...props}>
+      {[...Array(count)].map((_,i) => <MdStar key={i} size='1.5em'/>)}
+      {props.onClick && <MdStarBorder size='1.5em' />}
+    </Box>
   )
 }

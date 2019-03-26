@@ -34,7 +34,7 @@ export const GlobalStyle = createGlobalStyle`
       left:0;
       right:0;
       height:3px;
-      background-color:${p => p.theme.primary}
+      background-color:${p => p.theme.colors.primary}
     }
   }
 `;

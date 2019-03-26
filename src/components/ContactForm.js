@@ -23,7 +23,7 @@ const ContactForm = ({onFinished, data = null}) => {
 
   return (
     <Form onSubmit={submit}>
-      <Header>Gathering details</Header>
+      <Header mb="2">Your Contact Info</Header>
       <Fieldset>
         {fields.map(props=><FloatLabelInput value={contact[props.name]} onChange={setInput} key={props.name} {...props}/>)}
       </Fieldset>

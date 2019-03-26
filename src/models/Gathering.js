@@ -8,6 +8,7 @@ export default class Gathering {
   affinities = {}
   contact;
   active = false;
+  starsRemaining = 3;
 
   constructor(data){
     Object.assign(this, data);
