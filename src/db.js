@@ -1,5 +1,5 @@
 import Dexie from "dexie";
-import {Contact, Gathering} from './models'
+import {Contact, Gathering, contactFlags} from './models'
 
 class GatheringDb extends Dexie {
   gatherings;
@@ -28,6 +28,7 @@ class GatheringDb extends Dexie {
     Gathering.prototype.getContact = function(id){
       return db.transaction('r', db.contacts, async () => {
         const contact = await db.contacts.where({id}).first();
+        if(!contact) return contact;
         if(contact.recommenderId) contact.recommender = await db.contacts.where({id: contact.recommenderId}).first();
         contact.deserialize(this);
 
@@ -35,8 +36,28 @@ class GatheringDb extends Dexie {
       });
     }
     Gathering.prototype.addContact = function(data){
-      const contact = new Contact(data, this);
-      return contact.save();
+      return db.transaction('rw', db.contacts, async () => {
+        const contact = new Contact(data, this);
+        const existingContact = await this.getContact(data.id);
+        if(existingContact){
+          contact.stars = existingContact.stars;
+          contact.recommenderId = existingContact.recommenderId;
+          contact.recommender = existingContact.recommender
+          contact.flags.setFlags(existingContact.flags);
+        }
+        if(contact.email) contact.flags.toggleFlag(contactFlags.active, true);
+        await contact.save();
+
+        if(contact.recommenderId && !contact.recommender){
+          contact.recommender = await db.contacts.where({id: contact.recommenderId}).first();
+          contact.recommender.deserialize(this);
+        }
+
+        return contact;
+      });
+    }
+    Gathering.prototype.removeContact = function(contactId){
+      return db.contacts.where({id: contactId, gatheringId: this.id}).delete();
     }
     Gathering.prototype.activate = function(){
       return db.transaction('rw', db.gatherings, async () => {

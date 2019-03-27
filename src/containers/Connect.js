@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Button, Text, Spinner, Header, Form, Fieldset, FloatLabelInput, Box, QR } from '../components/UI';
+import { Button, Text, Spinner, Header, Form, Fieldset, FloatLabelInput, Box, QR, Alert } from '../components/UI';
 import { useGatheringContext, useNetworkContext } from '../contexts';
 
 const Connect = ({history}) => {
@@ -18,7 +18,7 @@ const Connect = ({history}) => {
       setStatus('connected');
     } catch(err) {
       setStatus('pending');
-      setError(err.message);
+      setError(err);
     }
   }
 
@@ -39,7 +39,7 @@ const Connect = ({history}) => {
     <Form onSubmit={startConnection}>
       <Header>Connect</Header>
       <Text fontSize='1' color='muted' mb='4'>Your codename is {gathering.contact.codename}</Text>
-      {error && <div>{error}</div>}
+      {error && <Alert variant="danger">{error}</Alert>}
       <Fieldset>
         <FloatLabelInput name="codename" value={codename} label="Their Code Name" onChange={(e) => setCodename(e.target.value)} required />
       </Fieldset>

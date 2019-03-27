@@ -1,24 +1,32 @@
 import MeshClient from 'simple-mesh-net';
+import md5 from 'md5-hash';
 
 const swapContact = {
-  receive: (channel, contact) =>
-    new Promise((resolve, reject) => {
-      console.log('listen', channel);
-      network.on(channel, (peer, req, res) => {
+  listen: (channel, contact) => {
+    console.log('listen', channel);
+    network.once(channel, (peer, req, res) => {
+      if(req.payload.toLowerCase() === contact.codename.toLowerCase()){
         res.send(contact);
-        resolve(req.payload);
-      });
-    }),
-    send: (channel, contact) =>
-    new Promise((resolve, reject) => {
-      setTimeout(() => {
-        console.log('send', channel);
-        network.broadcast(channel, contact).then(responseData => {
-          resolve(responseData);
-        })
-      }, 2000); //Wait 500ms to make sure that the listener is ready
-    })
+      } else res.send(null);
+    });
+  },
+  request: (channel, codename) => {
+    const pingWithCodename = async (resolve, reject, attempts) => {
+      try {
+        console.log('send', channel, attempts);
+        const contact = await network.broadcast(channel, codename, null, 1000);
+        resolve(contact);
+      } catch (e){
+        if(attempts >= 10) reject('Could not reach someone with that codename');
+        else pingWithCodename(resolve, reject, attempts + 1);
+      }
+    }
+
+    return new Promise((resolve, reject) => pingWithCodename(resolve, reject, 1));
+  }
 };
+
+
 
 class MeshNet {
   gathering = null;
@@ -39,6 +47,17 @@ class MeshNet {
     this.toBind.forEach(({type, handler, as}) => {
       this.client[as](type, handler);
     });
+
+    this.on('recommendation', async (peer, req, res) => {
+      const recommender = await this.gathering.getContact(peer.peerName);
+      if(!recommender) return res.send(false); // Don't accept recommendations from non-contacts
+      const existingContact = await this.gathering.getContact(req.payload.id);
+      if(existingContact) return res.send(false); // Don't accept if we're already connected
+
+      const contact = await this.gathering.addContact(req.payload);
+      this.emit('recommendation-received', contact);
+      res.send(true);
+    })
   }
   disconnect() {
     console.log('disconnect not implemented');
@@ -46,21 +65,24 @@ class MeshNet {
   }
   async swapContactInfo(codename) {
     const channelParts = [this.gathering.contact.codename.toLowerCase(), codename.toLowerCase()].sort();
-    const channel = channelParts.join(':');
-    const method =
-      channelParts[0] === this.gathering.contact.codename.toLowerCase() ? 'send' : 'receive';
+    const channel = md5(channelParts.join(':'));
 
     //TODO listen for failures here
-    const contact = await swapContact[method](channel, this.gathering.contact.serialize());
-
-    return contact;
+    swapContact.listen(channel, this.gathering.contact.serialize());
+    try {
+      const contact = await swapContact.request(channel, codename);
+      return contact;
+    } catch(rejection) {
+      this.off(channel);
+      throw rejection;
+    }
   }
   addStar(contactId) {
     this.broadcast('add-star', contactId);
   }
   async recommendContact(toContactId, contact) {
     // send contact
-    const didntHaveAlready = await this.send(toContactId, 'recommendation', contact.serialize());
+    const didntHaveAlready = await this.send(toContactId, 'recommendation', contact.serializeForRecommendation(this.gathering));
     return didntHaveAlready;
   }
   async announceAwards(awards) {

@@ -5,7 +5,7 @@ import { ThemeProvider } from 'styled-components/macro';
 import { GlobalStyle } from './components/styled-components/global';
 import { theme } from './components/styled-components/theme';
 
-import { useGatheringContext } from './contexts';
+import { useGatheringContext, useNetworkContext } from './contexts';
 
 import Layout from './hoc/Layout';
 import Gatherings from './containers/Gatherings';
@@ -14,7 +14,7 @@ import Gathering from './containers/Gathering';
 import EditContact from './containers/EditContact';
 import Contact from './containers/Contact';
 import JoinGathering from './containers/JoinGathering';
-import {Spinner} from './components/UI';
+import {Spinner, Alert} from './components/UI';
 
 const routes = [
 	{ path: '/', component: Gatherings, exact: true, inGathering: false },
@@ -27,12 +27,14 @@ const routes = [
 
 const App = () => {
   const { loading, gathering } = useGatheringContext();
+  const { recommendation } = useNetworkContext();
 
   return (
     <ThemeProvider theme={theme}>
       <BrowserRouter>
           <GlobalStyle/>
           <Layout>
+            {recommendation && <Alert>{recommendation.recommender.name} recommended <strong>{recommendation.name}</strong></Alert>}
             { loading ? <Spinner /> :
               <Switch>
                 {routes

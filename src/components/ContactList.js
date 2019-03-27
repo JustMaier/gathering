@@ -1,7 +1,8 @@
 import React from 'react';
 import {Link} from 'react-router-dom';
 import styled from 'styled-components/macro';
-import {ListGroup, ListGroupItem, Image, Box, Text} from './UI';
+import {ListGroup, ListGroupItem, Image, Box, Text, Stars, Spinner} from './UI';
+import { MdCheckCircle } from 'react-icons/md';
 
 export const ContactList = styled(ListGroup)`
 `;
@@ -25,15 +26,20 @@ ContactListGroupItem.defaultProps = {
   size: '60px'
 };
 
-export const ContactListItem = ({id, name, organization, img, status, onSelect = null}) => {
+export const ContactListItem = ({id, name, organization, img, stars, status, onSelect = null}) => {
   const content = (
     <React.Fragment>
       <div className="img">
         <Image src={img}/>
       </div>
-      <Box flexDirection='column'>
-        <Text fontWeight="800">{name}</Text>
-        <Text fontSize="1" color="muted">{organization}</Text>
+      <Box alignItems="center">
+        <Box flexDirection='column'>
+          <Text fontWeight="800">{name}</Text>
+          <Text fontSize="1" color="muted">{organization}</Text>
+        </Box>
+        {status === 'sending' && <Spinner size="40px" mt="0" mb="0" ml="4"/>}
+        {status === 'sent' && <Box color="primary" ml="4"><MdCheckCircle size="2em"/></Box>}
+        <Stars ml="auto" mr="2" count={stars}></Stars>
       </Box>
     </React.Fragment>
   );

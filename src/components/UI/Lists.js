@@ -37,7 +37,7 @@ export const ListGroupItem = styled.a`
     border-top: 1px solid ${_('list.border')};
   }
 
-  svg {
+  >svg:first-child {
     grid-area: icon;
     font-size: 24px;
     justify-self: center;

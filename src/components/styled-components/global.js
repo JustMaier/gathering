@@ -23,11 +23,12 @@ export const GlobalStyle = createGlobalStyle`
     background-repeat: no-repeat;
     background-position: 50% 50%;
     min-height:100vh;
-    max-width:400px;
+    max-width:${p=>p.theme.sizes.container};
     margin:0 auto;
     padding:3px 0 0;
 
     &:before{
+      z-index:101;
       content: '';
       position:fixed;
       top:0;

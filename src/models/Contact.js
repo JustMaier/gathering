@@ -15,6 +15,7 @@ export default class Contact {
   img;
   organization;
   email;
+  hash;
   phone;
   location;
   affinities;
@@ -50,13 +51,27 @@ export default class Contact {
     return serialized;
   }
 
+  serializeForRecommendation(gathering){
+    return {
+      id: this.id,
+      gatheringId: this.gatheringId,
+      name: this.name,
+      organization: this.organization,
+      hash: this.hash,
+      recommenderId: gathering.contact.id,
+      affinities: this.affinities.value,
+      stars: 0,
+      flags: 0
+    };
+  }
+
   deserialize(gathering){
     this.stars = isNaN(this.stars) ? 0 : this.stars;
     this.flags = new Flag(this.flags || 0, contactFlags);
     this.affinities = new Flag(this.affinities || 0, gathering.affinities);
     if(this.recommender) this.recommender.deserialize(gathering);
-    const hash = md5((this.email || '').toLowerCase());
-    this.img = `https://www.gravatar.com/avatar/${hash}?d=identicon`;
+    if(!this.hash) this.hash = md5((this.email || '').toLowerCase());
+    this.img = `https://www.gravatar.com/avatar/${this.hash}?d=identicon`;
 
     return this;
   }

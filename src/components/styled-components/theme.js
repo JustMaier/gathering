@@ -13,6 +13,10 @@ export const theme = {
     textShadow: rgba('#000', 0.3),
     header: '#5c50ca',
   },
+  sizes: {
+    gutter: '20px',
+    container: '400px'
+  },
   space: [
     0,5,10,15,20,30,60
   ],

@@ -13,7 +13,7 @@ const StatusIndicator = ({isOnline}) => {
           height:10px;
           display:block;
           margin-right:5px;
-          background-color: ${p=>p.isOnline ? p.theme.colors.success : p.theme.colors.danger}
+          background-color: ${p=>isOnline ? p.theme.colors.success : p.theme.colors.danger}
         `}
       ></span>
       <Text fontSize='0'>{isOnline?'online':'offline'}</Text>

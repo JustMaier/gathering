@@ -5,7 +5,7 @@ import { ContactList, ContactListItem } from '../components/ContactList';
 import StatusIndicator from '../components/StatusIndicator';
 import { useGatheringContext, useNetworkContext } from '../contexts';
 import {MdPhone, MdLocationCity, MdLocalOffer, MdEmail, MdDelete, MdCloudDownload} from 'react-icons/md';
-import {Contact as ContactModel} from '../models';
+import {contactFlags} from '../models';
 import Recommender from '../components/Recommender';
 
 const Contact = ({history, match: { params } }) => {
@@ -30,8 +30,8 @@ const Contact = ({history, match: { params } }) => {
   }
   const toggleRecommending = () => setRecommending(x=>!x);
   const deleteContact = () => {
-    actions.removeContact(contact.id);
-    history.push('/');
+    gathering.removeContact(contact.id);
+    history.replace('/');
   }
   const addStar = async () => {
     await gathering.giveStar(contact);
@@ -68,14 +68,15 @@ const Contact = ({history, match: { params } }) => {
       </Box>
 
       <ListGroup mt={4} mb={4}>
-        <ListGroupItem as="a" href={`mailto:${contact.email}`}><MdEmail/>{contact.email}</ListGroupItem>
-        <ListGroupItem as="a" href={`tel:${contact.phone}`}><MdPhone/>{contact.phone}</ListGroupItem>
-        <ListGroupItem as="div"><MdLocationCity/>{contact.location}</ListGroupItem>
+        {contact.email && <ListGroupItem as="a" href={`mailto:${contact.email}`}><MdEmail/>{contact.email}</ListGroupItem>}
+        {contact.phone && <ListGroupItem as="a" href={`tel:${contact.phone}`}><MdPhone/>{contact.phone}</ListGroupItem>}
+        {contact.location && <ListGroupItem as="div"><MdLocationCity/>{contact.location}</ListGroupItem>}
         <ListGroupItem as="div"><MdLocalOffer/>{contact.affinities.toString()}</ListGroupItem>
       </ListGroup>
-      <Button as="button" mb={3} block onClick={toggleRecommending} disabled={!isOnline}>Send Recommendation</Button>
+      <Button as="button" mb="3" block onClick={deleteContact} bg="danger">Delete</Button>
+      {contact.flags.hasFlag(contactFlags.active) && <Button as="button" mb="4" block onClick={toggleRecommending} disabled={!isOnline}>Send Recommendation</Button>}
       {recommending && (
-        <ContactList>
+        <ContactList mb="4">
           {contacts.filter(x=>x.id !== contact.id).map(x=><ContactListItem key={x.id} {...x} onSelect={sendRecommendation} status={recommendations[x.id]}/>)}
         </ContactList>
       )}
