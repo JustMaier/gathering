@@ -34,7 +34,7 @@ class MeshNet {
   async connect(gathering) {
     this.gathering = gathering;
     this.client = new MeshClient(gathering.contact.id, {
-      signalServer: 'ws://localhost:9090'
+      signalServer: process.env.REACT_APP_SIGNALSERVER
     });
 
     this.send = this.client.send.bind(this.client);
