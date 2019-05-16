@@ -1,6 +1,5 @@
 import React from 'react'
-import { Link } from 'react-router-dom';
-import { Image, Box, Text, Photo, Header, LinkButton } from './UI';
+import { Box, Text, Photo, Header, LinkButton } from './UI';
 import { MdEdit } from 'react-icons/md';
 
 const Me = ({name, img, organization}) => {

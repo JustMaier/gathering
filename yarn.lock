@@ -1220,9 +1220,10 @@ async-each@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/async-each/-/async-each-1.0.1.tgz#19d386a1d9edc6e7c1c85d388aedbcc56d33602d"
 
-async-limiter@~1.0.0:
+async-limiter@^1.0.0, async-limiter@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/async-limiter/-/async-limiter-1.0.0.tgz#78faed8c3d074ab81f22b4e985d79e8738f720f8"
+  integrity sha512-jp/uFnooOiO+L211eZOoSyzpOITMXx1rBITauYykG3BRYPu8h0UcxsPNB04RR5vo4Tyz3+ay17tR6JVf9qzYWg==
 
 async@^1.5.2:
   version "1.5.2"
@@ -5091,6 +5092,7 @@ levn@^0.3.0, levn@~0.3.0:
 lite-ee@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/lite-ee/-/lite-ee-1.0.1.tgz#d5146c42a80a1c915500bdfa1947b43f6d0c50ee"
+  integrity sha512-KRaQr5gBdp/RMSMZCFJe89jPC9jsoOHWpVF+xSD2D3XJbH02pY298TdCkIxJGauEmlQRLI0S0sJxsZaNMF2FXA==
 
 load-json-file@^1.0.0:
   version "1.1.0"
@@ -7663,17 +7665,19 @@ signal-exit@^3.0.0, signal-exit@^3.0.2:
   resolved "https://registry.yarnpkg.com/signal-exit/-/signal-exit-3.0.2.tgz#b5fdc08f1287ea1178628e415e25132b73646c6d"
 
 simple-mesh-net@^1.1.2:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/simple-mesh-net/-/simple-mesh-net-1.1.2.tgz#f11e553bae7deaec96f053b8df9008a0128d3e76"
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/simple-mesh-net/-/simple-mesh-net-1.2.0.tgz#0dd9a341b73b6b4882f22b75c516b4c3230cf4c7"
+  integrity sha512-LZPAZ5YqwkWnZrGRPSzt1zSIia6Jphy1gPqHFIshoTszj+gC4ohnqsyDTlQoQaiihhwKnT2Z3sWhxV9wqQvydQ==
   dependencies:
     lite-ee "^1.0.1"
     webrtc-link "^1.3.0"
 
 simple-mesh-signal@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/simple-mesh-signal/-/simple-mesh-signal-1.0.1.tgz#50f0963adc13a78b0c6b799d0cc2f08fd6a2b0ba"
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/simple-mesh-signal/-/simple-mesh-signal-1.2.0.tgz#17cc538d5ec671541d34daf88eb74e15ec77c8e8"
+  integrity sha512-/ovCD0L8VvX6tgGWwITp01HUfyU26jrW/u1aqf7Tv+m2kLNAa1hgZN8qQALGShV9papxtkqrJWuPRDz6/T9H4Q==
   dependencies:
-    ws "^6.1.4"
+    ws "^7.0.0"
 
 simple-swizzle@^0.2.2:
   version "0.2.2"
@@ -8706,6 +8710,7 @@ webpack@4.28.3:
 webrtc-link@^1.3.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/webrtc-link/-/webrtc-link-1.3.0.tgz#3e710c4bfa8900515fd26e65d27be0813917b9cb"
+  integrity sha512-MpiT37v35rcK4dheZfriwW8BDQc7w/rVs3XucLM/l3BVpGkN565uMZwizpEUNdLPwSiCwtVV4FUFf7FZS7UoYw==
   dependencies:
     lite-ee "^1.0.1"
 
@@ -8923,11 +8928,12 @@ ws@^5.2.0:
   dependencies:
     async-limiter "~1.0.0"
 
-ws@^6.1.4:
-  version "6.2.0"
-  resolved "https://registry.yarnpkg.com/ws/-/ws-6.2.0.tgz#13806d9913b2a5f3cbb9ba47b563c002cbc7c526"
+ws@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-7.0.0.tgz#79351cbc3f784b3c20d0821baf4b4ff809ffbf51"
+  integrity sha512-cknCal4k0EAOrh1SHHPPWWh4qm93g1IuGGGwBjWkXmCG7LsDtL8w9w+YVfaF+KSVwiHQKDIMsSLBVftKf9d1pg==
   dependencies:
-    async-limiter "~1.0.0"
+    async-limiter "^1.0.0"
 
 x-is-string@^0.1.0:
   version "0.1.0"

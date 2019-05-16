@@ -1,18 +1,22 @@
 import React from 'react'
 import styled from 'styled-components/macro';
 import { Link } from 'react-router-dom';
-import { rgba } from 'polished';
+import { rgba, math } from 'polished';
 import { LinkButton } from '../UI';
 import { useGatheringContext } from '../../contexts';
 import { MdAddCircle } from 'react-icons/md';
 
 const Nav = styled.nav`
   position: fixed;
-  width:400px;
+  width:calc(100vw - ${p=>math(`${p.theme.sizes.gutter} * 2`)});
   z-index: 100;
   display:flex;
   align-items:flex-start;
   justify-content: space-between;
+
+  @media(min-width: ${p=>p.theme.sizes.breakpoint}){
+    width:${p=>p.theme.sizes.container};
+  }
 `;
 
 const Logo = styled.a`
@@ -34,7 +38,7 @@ const Logo = styled.a`
 `;
 
 const Navbar = () => {
-  const {gathering, actions} = useGatheringContext();
+  const {gathering} = useGatheringContext();
 
   return (
     <Nav>

@@ -23,9 +23,15 @@ export const GlobalStyle = createGlobalStyle`
     background-repeat: no-repeat;
     background-position: 50% 50%;
     min-height:100vh;
-    max-width:${p=>p.theme.sizes.container};
+    max-width:100vw;
     margin:0 auto;
-    padding:3px 0 0;
+    padding:3px ${p=>p.theme.sizes.gutter} 0;
+
+    @media(min-width: ${p=>p.theme.sizes.breakpoint}){
+      max-width:${p=>p.theme.sizes.container};
+      padding-left:0px;
+      padding-right:0px;
+    }
 
     &:before{
       z-index:101;

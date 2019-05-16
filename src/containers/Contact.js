@@ -4,12 +4,12 @@ import { saveAs } from 'file-saver';
 import { ContactList, ContactListItem } from '../components/ContactList';
 import StatusIndicator from '../components/StatusIndicator';
 import { useGatheringContext, useNetworkContext } from '../contexts';
-import {MdPhone, MdLocationCity, MdLocalOffer, MdEmail, MdDelete, MdCloudDownload} from 'react-icons/md';
+import {MdPhone, MdLocationCity, MdLocalOffer, MdEmail, MdCloudDownload} from 'react-icons/md';
 import {contactFlags} from '../models';
 import Recommender from '../components/Recommender';
 
 const Contact = ({history, match: { params } }) => {
-  const { gathering, actions } = useGatheringContext();
+  const { gathering } = useGatheringContext();
   const { peers, actions: networkActions } = useNetworkContext();
   const [recommending, setRecommending] = useState(false);
   const [contact, setContact] = useState(null);

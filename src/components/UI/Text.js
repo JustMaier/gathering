@@ -1,5 +1,4 @@
 import styled, {css} from 'styled-components/macro';
-import { rgba } from 'polished';
 import { space, fontSize, fontWeight, lineHeight, color, textAlign, themeGet as _ } from 'styled-system';
 
 export const Text = styled.p`

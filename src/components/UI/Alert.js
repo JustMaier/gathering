@@ -1,6 +1,5 @@
-import React from 'react';
 import Styled, { css } from 'styled-components/macro';
-import {math, lighten, darken, rgba} from 'polished';
+import {math, lighten, rgba} from 'polished';
 
 const alertStyles = {
   success: css`

@@ -1,4 +1,4 @@
-import { darken, lighten, rgba } from 'polished';
+import { lighten, rgba } from 'polished';
 
 export const theme = {
   colors: {
@@ -15,7 +15,8 @@ export const theme = {
   },
   sizes: {
     gutter: '20px',
-    container: '400px'
+    container: '400px',
+    breakpoint: '440px'
   },
   space: [
     0,5,10,15,20,30,60
