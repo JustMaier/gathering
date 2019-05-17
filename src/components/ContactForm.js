@@ -16,13 +16,15 @@ const ContactForm = ({onFinished, data = null}) => {
     {name: 'codename', label: 'Code Name', required: true, if: contact.gatheringId == null || contact.codename == null},
     {name: 'name', label: 'Name', required: true},
     {name: 'organization', label: 'Organization'},
-    {name: 'email', label: 'Email', required: true},
-    {name: 'phone', label: 'Phone', required: true},
-    {name: 'location', label: 'Location', required: true}
+    {name: 'email', label: 'Email', required: !contact.github && !contact.twitter},
+    {name: 'github', label: 'Github', required: !contact.email && !contact.twitter},
+    {name: 'twitter', label: 'Twitter', required: !contact.github && !contact.email},
+    {name: 'phone', label: 'Phone'},
+    {name: 'location', label: 'Location'}
   ].filter(x=>x.if == null || x.if);
 
   return (
-    <Form onSubmit={submit}>
+    <Form onSubmit={submit}>``
       <Header mb="2">Your Contact Info</Header>
       <Fieldset>
         {fields.map(props=><FloatLabelInput value={contact[props.name]} onChange={setInput} key={props.name} {...props}/>)}
