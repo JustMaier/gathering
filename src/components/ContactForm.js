@@ -24,7 +24,7 @@ const ContactForm = ({onFinished, data = null}) => {
   ].filter(x=>x.if == null || x.if);
 
   return (
-    <Form onSubmit={submit}>``
+    <Form onSubmit={submit}>
       <Header mb="2">Your Contact Info</Header>
       <Fieldset>
         {fields.map(props=><FloatLabelInput value={contact[props.name]} onChange={setInput} key={props.name} {...props}/>)}
