@@ -1,5 +1,5 @@
-import { createGlobalStyle } from 'styled-components/macro';
-import reset from 'styled-normalize';
+import { createGlobalStyle } from 'styled-components/macro'
+import reset from 'styled-normalize'
 
 export const GlobalStyle = createGlobalStyle`
   ${reset}
@@ -25,10 +25,10 @@ export const GlobalStyle = createGlobalStyle`
     min-height:100vh;
     max-width:100vw;
     margin:0 auto;
-    padding:3px ${p=>p.theme.sizes.gutter} 0;
+    padding:3px ${p => p.theme.sizes.gutter} 0;
 
-    @media(min-width: ${p=>p.theme.sizes.breakpoint}){
-      max-width:${p=>p.theme.sizes.container};
+    @media(min-width: ${p => p.theme.sizes.breakpoint}){
+      max-width:${p => p.theme.sizes.container};
       padding-left:0px;
       padding-right:0px;
     }
@@ -44,4 +44,4 @@ export const GlobalStyle = createGlobalStyle`
       background-color:${p => p.theme.colors.primary}
     }
   }
-`;
+`

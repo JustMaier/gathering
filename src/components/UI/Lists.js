@@ -1,4 +1,4 @@
-import styled from 'styled-components/macro';
+import styled from 'styled-components/macro'
 import { space, themeGet as _ } from 'styled-system'
 
 export const ListGroup = styled.div`
@@ -9,18 +9,18 @@ export const ListGroup = styled.div`
   overflow: hidden;
   background: ${_('list.bg')};
   box-shadow: 0px 1px 5px rgba(0,0,0,.3);
-`;
+`
 
 ListGroup.propTypes = {
   ...space.propTypes
-};
+}
 ListGroup.defaultProps = {
 }
 
 export const ListGroupItem = styled.a`
   display: grid;
-  grid-template-columns: ${p=>p.size} 1fr;
-  grid-template-rows: ${p=>p.size};
+  grid-template-columns: ${p => p.size} 1fr;
+  grid-template-rows: ${p => p.size};
   grid-template-areas: "icon content";
   align-items: center;
   font-size: 1em;
@@ -43,7 +43,7 @@ export const ListGroupItem = styled.a`
     justify-self: center;
     color: ${_('colors.primary')};
   }
-`;
+`
 ListGroupItem.defaultProps = {
   size: '50px'
 }

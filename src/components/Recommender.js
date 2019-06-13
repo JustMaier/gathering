@@ -1,9 +1,9 @@
-import React from 'react';
-import { Box, Text } from './UI';
+import React from 'react'
+import { Box, Text } from './UI'
 
-const Recommender = ({contact}) => {
-  if(!contact || !contact.recommender) return null;
-  const recommender = contact.recommender;
+const Recommender = ({ contact }) => {
+  if (!contact || !contact.recommender) return null
+  const recommender = contact.recommender
 
   return (
     <Box flexDirection='column' alignItems='center'>
@@ -13,4 +13,4 @@ const Recommender = ({contact}) => {
   )
 }
 
-export default Recommender;
+export default Recommender

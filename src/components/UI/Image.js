@@ -1,5 +1,5 @@
-import styled from 'styled-components';
-import { space, size, boxShadow, borderRadius, border} from "styled-system";
+import styled from 'styled-components'
+import { space, size, boxShadow, borderRadius, border } from 'styled-system'
 
 export const Image = styled.img`
   ${space}
@@ -13,11 +13,11 @@ Image.propTypes = {
   ...size.propTypes,
   ...boxShadow.propTypes,
   ...borderRadius.propTypes,
-  ...border.propTypes,
+  ...border.propTypes
 }
 
 export const Photo = styled(Image)`
-`;
+`
 Photo.defaultProps = {
   size: '180px',
   border: 'faint',

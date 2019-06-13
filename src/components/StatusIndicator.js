@@ -1,9 +1,8 @@
-import React from 'react';
-import {css} from 'styled-components/macro';
+import React from 'react'
+import { css } from 'styled-components/macro'
 import { Box, Text } from './UI'
 
-const StatusIndicator = ({isOnline}) => {
-
+const StatusIndicator = ({ isOnline }) => {
   return (
     <Box alignItems='center'>
       <span
@@ -13,12 +12,12 @@ const StatusIndicator = ({isOnline}) => {
           height:10px;
           display:block;
           margin-right:5px;
-          background-color: ${p=>isOnline ? p.theme.colors.success : p.theme.colors.danger}
+          background-color: ${p => isOnline ? p.theme.colors.success : p.theme.colors.danger}
         `}
-      ></span>
-      <Text fontSize='0'>{isOnline?'online':'offline'}</Text>
+      />
+      <Text fontSize='0'>{isOnline ? 'online' : 'offline'}</Text>
     </Box>
   )
 }
 
-export default StatusIndicator;
+export default StatusIndicator

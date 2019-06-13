@@ -1,5 +1,5 @@
-import styled, {css} from 'styled-components/macro';
-import { space, fontSize, fontWeight, lineHeight, color, textAlign, themeGet as _ } from 'styled-system';
+import styled, { css } from 'styled-components/macro'
+import { space, fontSize, fontWeight, lineHeight, color, textAlign, themeGet as _ } from 'styled-system'
 
 export const Text = styled.p`
   ${space}
@@ -8,7 +8,7 @@ export const Text = styled.p`
   ${lineHeight}
   ${color}
   ${textAlign}
-  ${p=>p.allCaps && css`
+  ${p => p.allCaps && css`
     text-transform:uppercase;
   `}
 `
@@ -25,9 +25,9 @@ Text.defaultProps = {
 }
 
 export const Header = styled(Text.withComponent('h1'))`
-	letter-spacing: -0.03em;
+  letter-spacing: -0.03em;
   text-shadow: 1px 2px 3px ${_('colors.textShadow')};
-`;
+`
 Header.defaultProps = {
   fontSize: 5,
   fontWeight: 600,

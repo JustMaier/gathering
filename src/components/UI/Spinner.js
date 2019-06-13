@@ -1,7 +1,6 @@
 import React from 'react'
-import styled from 'styled-components/macro';
-import {space, color, size} from 'styled-system';
-
+import styled from 'styled-components/macro'
+import { space, color, size } from 'styled-system'
 
 export const Spinner = styled(p => (
   <div className={p.className}>
@@ -34,13 +33,13 @@ export const Spinner = styled(p => (
     0%, 100% { transform: scale(0.0) }
     50% { transform: scale(1.0) }
   }
-`;
+`
 
 Spinner.defaultProps = {
-  mt:5,
-  mb:5,
-  ml:'auto',
-  mr:'auto',
+  mt: 5,
+  mb: 5,
+  ml: 'auto',
+  mr: 'auto',
   size: '60px',
   bg: 'primary'
 }

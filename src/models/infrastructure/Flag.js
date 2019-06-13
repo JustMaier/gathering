@@ -1,53 +1,53 @@
-class Flag extends Number{
-  constructor(value, map){
-    super(value);
+class Flag extends Number {
+  constructor (value, map) {
+    super(value)
 
     if (Array.isArray(map)) {
-      var mapObj = {};
-      map.forEach(x => mapObj[x.key] = x.value);
-      map = mapObj;
+      var mapObj = {}
+      map.forEach(x => { mapObj[x.key] = x.value })
+      map = mapObj
     }
 
-    this.value = this.valueOf();
-    this.valueOf = () => this.value;
-    this.map = map;
-    this.length = this.getFlags().length;
+    this.value = this.valueOf()
+    this.valueOf = () => this.value
+    this.map = map
+    this.length = this.getFlags().length
   }
-  hasFlags(){
-    return this.length > 0;
+  hasFlags () {
+    return this.length > 0
   }
-  hasFlag(flag) {
-		flag = typeof flag === 'string' ? this.map[flag] : flag;
-		return (this.valueOf() & flag) === flag;
-	}
-  getFlags(fn){
-    if(fn == null) fn = (key, map) => key;
-    return Object.keys(this.map).filter(key => this.hasFlag(key)).map(key => fn(key, this.map));
+  hasFlag (flag) {
+    flag = typeof flag === 'string' ? this.map[flag] : flag
+    return (this.valueOf() & flag) === flag
   }
-  forEach(cb){
-    return this.getFlags().forEach(key => cb(key, this.map[key]));
+  getFlags (fn) {
+    if (fn == null) fn = (key, map) => key
+    return Object.keys(this.map).filter(key => this.hasFlag(key)).map(key => fn(key, this.map))
   }
-  toObject(){
-    const obj = {};
-		this.forEach((key, val) => obj[key] = val);
-		return obj;
+  forEach (cb) {
+    return this.getFlags().forEach(key => cb(key, this.map[key]))
   }
-  toString(){
-    return this.getFlags().join(', ');
+  toObject () {
+    const obj = {}
+    this.forEach((key, val) => { obj[key] = val })
+    return obj
   }
-  toggleFlag(flag, setTo = null) {
-    flag = typeof flag === 'string' ? this.map[flag] : flag;
-		if (setTo === true) this.value = this.valueOf() | flag;
-		else if (setTo === false) this.value = this.valueOf() & ~flag;
-    else this.value = this.valueOf() ^ flag;
-    this.length = this.getFlags().length;
-		return this;
+  toString () {
+    return this.getFlags().join(', ')
   }
-  setFlags(flag){
-    this.value = flag;
-    this.length = this.getFlags().length;
-    return this;
+  toggleFlag (flag, setTo = null) {
+    flag = typeof flag === 'string' ? this.map[flag] : flag
+    if (setTo === true) this.value = this.valueOf() | flag
+    else if (setTo === false) this.value = this.valueOf() & ~flag
+    else this.value = this.valueOf() ^ flag
+    this.length = this.getFlags().length
+    return this
+  }
+  setFlags (flag) {
+    this.value = flag
+    this.length = this.getFlags().length
+    return this
   }
 }
 
-export default Flag;
+export default Flag

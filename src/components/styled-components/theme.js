@@ -1,4 +1,4 @@
-import { lighten, rgba } from 'polished';
+import { lighten, rgba } from 'polished'
 
 export const theme = {
   colors: {
@@ -11,7 +11,7 @@ export const theme = {
     text: '#fff',
     muted: rgba('#fff', 0.7),
     textShadow: rgba('#000', 0.3),
-    header: '#5c50ca',
+    header: '#5c50ca'
   },
   sizes: {
     gutter: '20px',
@@ -19,7 +19,7 @@ export const theme = {
     breakpoint: '440px'
   },
   space: [
-    0,5,10,15,20,30,60
+    0, 5, 10, 15, 20, 30, 60
   ],
   fontSizes: [
     10, 14, 16, 20, 24, 36, 48
@@ -30,10 +30,10 @@ export const theme = {
   borders: {
     faint: '1px solid rgba(255,255,255, .1)'
   }
-};
+}
 
 theme.list = {
-  hover: lighten(.05, theme.colors.bg),
-  border: lighten(.1, theme.colors.bg),
-  bg: rgba(lighten(.02, theme.colors.bg), .8),
+  hover: lighten(0.05, theme.colors.bg),
+  border: lighten(0.1, theme.colors.bg),
+  bg: rgba(lighten(0.02, theme.colors.bg), 0.8)
 }
