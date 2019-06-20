@@ -1,41 +1,70 @@
-import DataNode from '../../p2p/libp2p-json-node/src/index'
+import DataNode from 'libp2p-json-node'
+import LevelStore from 'datastore-level'
+import levelJs from 'level-js'
 import md5 from 'md5-hash'
+import { isSetEqual } from './shared/utility'
+
+const shorten = peerId => peerId.substring(2).substring(0, 6)
 
 const swapContact = {
-  listen: (channel, contact) => {
-    console.log('listen', channel.topic)
-    channel.once('connect', (message, res) => {
-      if (message.data.toLowerCase() === contact.codename.toLowerCase()) res.send(contact)
-      else res.send(null)
-      network.unsubscribe(channel.topic)
-    })
-  },
-  request: (channel, codename) => {
-    const pingWithCodename = async (resolve, reject, attempts) => {
-      try {
-        console.log('send', channel.topic, attempts)
-        const contact = await channel.publishWithResponse('connect', codename, 1000)
-        resolve(contact)
-      } catch (e) {
-        if (attempts >= 10) reject('Could not reach someone with that codename')
-        else pingWithCodename(resolve, reject, attempts + 1)
+  timeout: 20000,
+  attempts: 20,
+  timeoutMessage: 'Could not reach someone with that codename',
+  request: (network, channel, myContactInfo, theirCodename) => new Promise((resolve, reject) => {
+    const listener = ({ data }, res) => {
+      // If they aren't the person we want to swap with, ignore it...
+      if (data.codename.toLowerCase() !== theirCodename.toLowerCase()) res.send(null)
+      else {
+        resolve(data)
+        clearInterval(interval)
+        res.send(myContactInfo)
       }
     }
+    network.once(channel.topic, listener)
 
-    return new Promise((resolve, reject) => pingWithCodename(resolve, reject, 1))
-  }
+    let attempts = swapContact.attempts
+    const interval = setInterval(() => {
+      if (attempts === 0) {
+        clearInterval(interval)
+        network.off(channel.topic, listener)
+        reject(new Error(swapContact.timeoutMessage))
+      } else {
+        channel.publish('connect', theirCodename)
+        attempts--
+        console.log(`Send ${channel.topic} | ${attempts} attempts left`)
+      }
+    }, swapContact.timeout / attempts)
+  }),
+  listen: (network, channel, myContactInfo) => new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      channel.off('connect')
+      reject(new Error(swapContact.timeoutMessage))
+    }, swapContact.timeout)
+
+    channel.once('connect', async ({ data, peerInfo }) => {
+      if (data.toLowerCase() !== myContactInfo.codename.toLowerCase()) return
+
+      const res = await network.send(peerInfo, channel.topic, myContactInfo)
+      resolve(res.data)
+      clearTimeout(timeout)
+    })
+
+    console.log(`Listen ${channel.topic}`)
+  })
 }
 
 class MeshNet extends DataNode {
   gathering;
 
-  static async create ({ options } = {}) {
+  static async create () {
+    const datastore = new LevelStore('gatheringnode', { db: levelJs })
+    await new Promise(resolve => datastore.open(resolve))
     const node = await super.create({
-      signalServer: process.env.REACT_APP_SIGNALSERVER,
+      datastore,
+      signalingServer: process.env.REACT_APP_SIGNALSERVER,
       config: {
-        peerDiscovery: { autoDial: false }
-      },
-      ...options
+        // peerDiscovery: { autoDial: false }
+      }
     })
 
     return node
@@ -44,38 +73,72 @@ class MeshNet extends DataNode {
   start (gathering) {
     this.gathering = gathering
     this.protocol = `/gathering/1.0.0/${gathering.id.substring(0, 5)}`
-    super.start()
+
+    this._activePeers = new Set()
+    const emitActivePeerChange = () => {
+      console.log(this.peerBook.getAllArray().filter(x => x.isConnected()).map(x => x.id.toB58String()))
+      const newActivePeers = new Set(this.peerBook.getAllArray().filter(x => x.isConnected()))
+      if (isSetEqual(newActivePeers, this._activePeers)) return
+
+      this._activePeers = newActivePeers
+      this._connected = this._activePeers.length
+      this.emit('peer:change', this._activePeers)
+    }
+    this.on('peer:connect', emitActivePeerChange)
+    this.on('peer:disconnect', emitActivePeerChange)
+    this.on('peer:ignored', peerInfo => console.log('ignoring', peerInfo.id.toB58String()))
+    this.on('peer:error', (peerInfo, err) => console.log('Dial failed', peerInfo.id.toB58String(), err.message))
+
+    this._connected = false
+    this.on('peer:change', activePeers => {
+      const newConnectionStatus = activePeers.size > 0
+      if (this._connected === newConnectionStatus) return
+
+      this._connected = newConnectionStatus
+      this.emit('connection:change', { connected: this._connected })
+      this.emit(`connection:${!this._connected ? 'disconnected' : 'connected'}`)
+    })
+
+    return super.start()
   }
 
   stop () {
     this.gathering = null
-    super.stop()
+    return super.stop()
   }
 
-  async createGathering (gathering, affinities) {
+  async createGathering (gathering) {
     // Instantiate gathering DHT values
     await this.dht.putJSONAsync(`gathering:${this.gathering.id}/connections`, [])
-    await this.dht.putJSONAsync(`gathering:${this.gathering.id}/affinities`, affinities)
-    await Promise.all(affinities.map(async x => {
-      await this.dht.putJSONAsync(`gathering:${this.gathering.id}/affinities/${x.id}`, [])
-    }))
+    await this.dht.putJSONAsync(`gathering:${this.gathering.id}/affinities`, [])
   }
-  async swapContactInfo (codename) {
-    const channelParts = [this.gathering.contact.codename.toLowerCase(), codename.toLowerCase()].sort()
-    const topic = md5(channelParts.join(':'))
-
+  async swapContactInfo (theirCodename) {
+    const channelParts = [this.gathering.contact.codename.toLowerCase(), theirCodename.toLowerCase()].sort()
+    const isDialer = this.gathering.contact.codename.toLowerCase() === channelParts[0]
+    const topic = shorten(md5(channelParts.join(':')))
     const channel = this.subscribe(topic)
-    swapContact.listen(channel, this.gathering.contact.serialize())
-    const contact = await swapContact.request(channel, codename)
-    const [a, b] = [this.peerId, contact.peerId].sort()
+
+    let theirContactInfo
+    const myContactInfo = { ...this.gathering.contact.serialize(), peerId: this.peerId }
+    try {
+      if (isDialer) theirContactInfo = await swapContact.request(this, channel, myContactInfo, theirCodename)
+      else theirContactInfo = await swapContact.listen(this, channel, myContactInfo)
+      console.log('got contact', theirContactInfo)
+    } catch (err) {
+      this.unsubscribe(topic)
+      throw err
+    }
+
+    const [a, b] = [this.peerId, theirContactInfo.peerId].map(shorten).sort()
     this.upsertConnection({ a, b, active: true }, ['active'])
-    return contact
+
+    return theirContactInfo
   }
   async getConnections () {
     return this.dht.getJSONAsync(`gathering:${this.gathering.id}/connections`)
   }
   async getConnection (peerId) {
-    const [a, b] = [peerId, this.peerId].sort()
+    const [a, b] = [peerId, this.peerId].map(shorten).sort()
     const connections = await this.getConnections()
     return connections.find(x => x.a === a && x.b === b)
   }
@@ -97,22 +160,23 @@ class MeshNet extends DataNode {
   }
   async addStar (peerId) {
     const connection = await this.getConnection(peerId)
-    const isA = connection.a === peerId
+    const isA = connection.a === shorten(peerId)
     connection.stars[isA ? 0 : 1]++
     return this.upsertConnection(connection, ['stars'])
   }
   async recommendContact (peerId, toId) {
     const connections = await this.getConnections()
-    const [a, b] = [peerId, toId].sort()
+    const [a, b] = [peerId, toId].map(shorten).sort()
     const targetIndex = connections.findIndex(x => x.a === a && x.b === b)
-    if (!targetIndex) this.upsertConnection({ a, b, via: this.peerId, active: false })
+    if (!targetIndex) this.upsertConnection({ a, b, via: shorten(this.peerId), active: false })
   }
   async getRecommendations () {
     const connections = await this.getConnections()
-    return connections.filter(x => (x.a === this.peerId || x.b === this.peerId) && x.via && !x.active)
+    const shortPeerId = shorten(this.peerId)
+    return connections.filter(x => (x.a === shortPeerId || x.b === shortPeerId) && x.via && !x.active)
   }
   async getPublicInfo (peerId) {
-    return this.dht.getJSONAsync(`/gathering:${this.gathering.id}/peer:${peerId}`)
+    return this.dht.getJSONAsync(`gathering:${this.gathering.id}/peer:${shorten(peerId)}`)
   }
   async updatePublicInfo (info) {
     let currentInfo = { affinities: [] }
@@ -122,39 +186,39 @@ class MeshNet extends DataNode {
 
     // Remove from removed affinities
     await Promise.all(currentInfo.affinities.filter(id => !info.affinities.includes(id)).map(async id => {
-      await this.upsertAffinityPeers(id, this.peerId, true)
+      await this.upsertAffinityPeers(id, true)
     }))
 
     // Add to new affinities
     await Promise.all(info.affinities.filter(id => !currentInfo.affinities.includes(id)).map(async id => {
-      await this.upsertAffinityPeers(id, this.peerId)
+      await this.upsertAffinityPeers(id)
     }))
 
-    await this.dht.putJSONAsync(`/gathering:${this.gathering.id}/peer:${this.peerId}`, info)
+    await this.dht.putJSONAsync(`gathering:${this.gathering.id}/peer:${shorten(this.peerId)}`, { name: info.name, hash: info.hash })
   }
   async getAffinities () {
-    return this.dht.getJSONAsync(`/gathering:${this.gathering.id}/affinities`)
+    return this.dht.getJSONAsync(`gathering:${this.gathering.id}/affinities`)
   }
-  async addAffinity (affinity) {
-    const affinities = await this.getAffinities()
-    if (!affinities.find(x => x.name.toLowerCase() === affinity.name.toLowerCase() || x.id === affinity.id)) {
-      affinities.push(affinity)
-      await this.dht.putJSONAsync(`/gathering:${this.gathering.id}/affinities`, affinities)
-      await this.dht.putJSONAsync(`/gathering:${this.gathering.id}/affinities/${affinity.id}`, [])
+  async addAffinities (affinities) {
+    const currentAffinities = await this.getAffinities()
+    affinities = affinities.filter(x => !currentAffinities.some(y => y.name.toLowerCase() === x.name.toLowerCase() || y.id === x.id))
+    if (affinities.length > 0) {
+      await this.dht.putJSONAsync(`gathering:${this.gathering.id}/affinities`, currentAffinities.concat(affinities))
+      await Promise.all(affinities.map(async affinity => this.dht.putJSONAsync(`gathering:${this.gathering.id}/affinities/${affinity.id}`, [])))
     }
   }
   async getAffinityPeers (affinityId) {
-    return this.dht.getJSONAsync(`/gathering:${this.gathering.id}/affinities/${affinityId}`)
+    return this.dht.getJSONAsync(`gathering:${this.gathering.id}/affinities/${affinityId}`)
   }
-  async upsertAffinityPeers (affinityId, peerId, remove = false) {
-    const peers = this.getAffinityPeers(affinityId)
-    const peerIdIndex = peers.indexOf(peerId)
+  async upsertAffinityPeers (affinityId, remove = false) {
+    const peers = await this.getAffinityPeers(affinityId)
+    const shortPeerId = shorten(this.peerId)
+    const peerIdIndex = peers.indexOf(shortPeerId)
     if (remove && peerIdIndex !== -1) peers.splice(peerIdIndex, 1)
-    else if (!remove && peerIdIndex === -1) peers.push(peerId)
+    else if (!remove && peerIdIndex === -1) peers.push(shortPeerId)
     else return
-    await this.dht.putJSONAsync(`/gathering:${this.gathering.id}/affinities/${affinityId}`, peers)
+    await this.dht.putJSONAsync(`gathering:${this.gathering.id}/affinities/${affinityId}`, peers)
   }
 }
 
-const network = new MeshNet()
-export default network
+export default MeshNet

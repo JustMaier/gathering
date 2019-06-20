@@ -18,15 +18,15 @@ const JoinGathering = ({ location }) => {
   }, [])
   if (!ready) return <Spinner />
 
-  const joinGathering = async (contact) => {
-    const gatheringId = await actions.addGathering(gathering, contact)
-    await actions.activate(gatheringId)
+  const createGathering = async (gathering) => {
+    setGathering(await actions.createGathering(gathering))
   }
+  const joinGathering = async (contact) => actions.joinGathering(gathering, contact)
 
   return (
     <React.Fragment>
       {!gathering.name ? (
-        <GatheringForm onFinished={setGathering} />
+        <GatheringForm onFinished={createGathering} />
       ) : (
         <ContactForm onFinished={joinGathering} />
       )}

@@ -18,7 +18,6 @@ export default class Contact {
   hash;
   phone;
   location;
-  affinities;
   notes;
   flags = new Flag(0, contactFlags);
   stars = 0;
@@ -43,8 +42,7 @@ export default class Contact {
   serialize () {
     const serialized = {
       ...this,
-      flags: this.flags.value,
-      affinities: this.affinities.value
+      flags: this.flags.value
     }
     delete serialized.recommender
     delete serialized.img
@@ -59,7 +57,6 @@ export default class Contact {
       organization: this.organization,
       hash: this.hash,
       recommenderId: gathering.contact.id,
-      affinities: this.affinities.value,
       stars: 0,
       flags: 0
     }
@@ -68,7 +65,6 @@ export default class Contact {
   deserialize (gathering) {
     this.stars = isNaN(this.stars) ? 0 : this.stars
     this.flags = new Flag(this.flags || 0, contactFlags)
-    this.affinities = new Flag(this.affinities || 0, gathering.affinities)
     if (this.recommender) this.recommender.deserialize(gathering)
     if (!this.hash) this.hash = md5((this.email || '').toLowerCase())
     this.img = `https://www.gravatar.com/avatar/${this.hash}?d=identicon`

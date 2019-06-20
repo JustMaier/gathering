@@ -1,24 +1,23 @@
 import React, { useState } from 'react'
 import { Button, Text, Spinner, Header, Form, Fieldset, FloatLabelInput, Box, QR, Alert } from '../components/UI'
-import { useGatheringContext, useNetworkContext } from '../contexts'
+import { useGatheringContext } from '../contexts'
 
 const Connect = ({ history }) => {
   const [codename, setCodename] = useState('')
   const [status, setStatus] = useState('pending')
   const [error, setError] = useState(null)
-  const { gathering } = useGatheringContext()
-  const { actions: networkActions } = useNetworkContext()
+  const { gathering, actions } = useGatheringContext()
 
   const startConnection = async e => {
     e.preventDefault()
     setStatus('loading')
     try {
-      const contact = await networkActions.connectWith(codename)
+      const contact = await actions.connectWith(codename)
       await gathering.addContact(contact)
       setStatus('connected')
     } catch (err) {
       setStatus('pending')
-      setError(err)
+      setError(err.message)
     }
   }
 

@@ -7,13 +7,15 @@ import { NetworkContextProvider, useNetworkContext } from './networkContext'
 
 export const AppContextProvider = ({ children }) => {
   return (
-    <GatheringContextProvider>
-      <NetworkContextProvider>{children}</NetworkContextProvider>
-    </GatheringContextProvider>
+    <NetworkContextProvider>
+      <GatheringContextProvider>
+        {children}
+      </GatheringContextProvider>
+    </NetworkContextProvider>
   )
 }
 
 export {
-  useNetworkContext,
-  useGatheringContext
+  useGatheringContext,
+  useNetworkContext
 }

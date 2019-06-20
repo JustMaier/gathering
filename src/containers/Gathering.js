@@ -6,14 +6,16 @@ import { ContactList, ContactListItem } from '../components/ContactList'
 
 const Gathering = () => {
   const { gathering, actions } = useGatheringContext()
-  const { recommendation } = useNetworkContext()
+  const network = useNetworkContext()
   const [contacts, setContacts] = useState([])
   useEffect(() => {
     gathering.getContacts().then(setContacts)
+    network.getConnections().then(connections => console.log(connections)).catch(err => console.log(err))
   }, [gathering])
-  useEffect(() => {
-    if (recommendation) { setContacts([recommendation, ...contacts]) }
-  }, [recommendation])
+  // TODO some way of notifying me when I get a new recommendation
+  // useEffect(() => {
+  //   if (recommendation) { setContacts([recommendation, ...contacts]) }
+  // }, [recommendation])
 
   return (
     <React.Fragment>

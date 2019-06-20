@@ -4,9 +4,10 @@ export const updateState = state => {
   return uState
 }
 
-export const uuid = () => 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+export const uuid = () => 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, c => {
+  const r = Math.random() * 16 | 0
   // eslint-disable-next-line no-mixed-operators
-  var r = Math.random() * 16 | 0; var v = c === 'x' ? r : r & 0x3 | 0x8
+  const v = c === 'x' ? r : r & 0x3 | 0x8
   return v.toString(16)
 })
 
@@ -16,3 +17,5 @@ export const addDays = (date, days) => {
   date.setDate(date.getDate() + days)
   return date
 }
+
+export const isSetEqual = (a, b) => a.size === b.size && [...a].every(value => b.has(value))

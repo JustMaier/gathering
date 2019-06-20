@@ -1,7 +1,8 @@
 import styled from 'styled-components'
-import { space, width, color, flex, flexDirection, alignItems, alignSelf, justifyContent, justifySelf, flexWrap } from 'styled-system'
+import { space, width, color, flex, flexDirection, alignItems, alignSelf, justifyContent, justifySelf, flexWrap, borderRadius } from 'styled-system'
 
 export const Box = styled.div`
+  ${borderRadius}
   ${space}
   ${width}
   ${color}
@@ -15,6 +16,7 @@ export const Box = styled.div`
   display:flex;
 `
 Box.propTypes = {
+  ...borderRadius.propTypes,
   ...space.propTypes,
   ...width.propTypes,
   ...color.propTypes,

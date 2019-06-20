@@ -25,7 +25,6 @@ const Logo = styled.a`
   background: ${p => p.theme.colors.primary};
   display: block;
   border-radius: 0 0 5px 5px;
-  width: 130px;
   height: 45px;
   line-height: 42px;
   padding: 0 10px;

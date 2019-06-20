@@ -4,14 +4,13 @@ import { ListGroup, ListGroupItem, Button, Header, Spinner, Stars, Text, Box, Ph
 import { saveAs } from 'file-saver'
 import { ContactList, ContactListItem } from '../components/ContactList'
 import StatusIndicator from '../components/StatusIndicator'
-import { useGatheringContext, useNetworkContext } from '../contexts'
+import { useGatheringContext } from '../contexts'
 import { MdPhone, MdLocationCity, MdLocalOffer, MdEmail, MdCloudDownload } from 'react-icons/md'
 import { contactFlags } from '../models'
 import Recommender from '../components/Recommender'
 
 const Contact = ({ history, match: { params } }) => {
-  const { gathering } = useGatheringContext()
-  const { peers, actions: networkActions } = useNetworkContext()
+  const { gathering, peers, actions } = useGatheringContext()
   const [recommending, setRecommending] = useState(false)
   const [contact, setContact] = useState(null)
   const [contacts, setContacts] = useState([])
@@ -40,7 +39,7 @@ const Contact = ({ history, match: { params } }) => {
   const sendRecommendation = async (recommendedContactId) => {
     setRecommendations(x => ({ ...x, [recommendedContactId]: 'sending' }))
     const recommendedContact = await gathering.getContact(recommendedContactId)
-    await networkActions.recommend(contact.id, recommendedContact)
+    await actions.recommend(contact.id, recommendedContact)
     setRecommendations(x => ({ ...x, [recommendedContactId]: 'sent' }))
   }
 

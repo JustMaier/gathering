@@ -47,10 +47,32 @@ Fieldset.defaultProps = {
 
 const FormGroup = (props) => (
   <div className={props.className}>
-    <input id={props.name} type={props.type || 'text'} name={props.name} placeholder=' ' required={props.required} value={props.value} onChange={props.onChange} />
+    <Input id={props.name} type={props.type || 'text'} name={props.name} placeholder=' ' required={props.required} value={props.value} onChange={props.onChange} />
     <label htmlFor={props.name}>{props.label || props.name}</label>
   </div>
 )
+
+export const Input = styled.input`
+  display: block;
+  background-color: transparent;
+  border: none;
+  width: 100%;
+  font-weight: 300;
+  padding: 18px 12px 8px;
+  border: 1px solid ${formStyleVariables.inputBorder};
+  background: ${p => rgba(formStyleVariables.inputBg(p), 0.8)};
+  color: inherit;
+  position: relative;
+  appearance: none;
+  box-shadow: none;
+
+  &:focus {
+    box-shadow: none;
+    border-color: ${p => p.theme.colors.primary};
+    outline: none;
+    z-index: 2;
+  }
+`
 
 export const FloatLabelInput = styled(FormGroup)`
   position: relative;
@@ -78,27 +100,7 @@ export const FloatLabelInput = styled(FormGroup)`
     }
   }
 
-  input, textarea {
-    display: block;
-    background-color: transparent;
-    border: none;
-    width: 100%;
-    font-weight: 300;
-    padding: 18px 12px 8px;
-    border: 1px solid ${formStyleVariables.inputBorder};
-    background: ${p => rgba(formStyleVariables.inputBg(p), 0.8)};
-    color: inherit;
-    position: relative;
-    appearance: none;
-    box-shadow: none;
-
-    &:focus {
-      box-shadow: none;
-      border-color: ${p => p.theme.colors.primary};
-      outline: none;
-      z-index: 2;
-    }
-
+  ${Input}{
     &:focus, &:not(:placeholder-shown) {
       & ~ label {
         font-size: 10px;
@@ -123,7 +125,7 @@ export const FloatLabelInput = styled(FormGroup)`
   }
 
   & + & {
-    input, textarea {
+    ${Input} {
       margin-top: -1px;
     }
   }
