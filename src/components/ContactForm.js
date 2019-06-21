@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import { Form, Fieldset, FloatLabelInput, Button, Header, Tag, TagList, Box, ColorInput } from './UI'
-import { useNetworkContext } from '../contexts'
 import { MdAddCircle } from 'react-icons/md'
 
 const ContactForm = ({ onFinished, data = null }) => {
@@ -8,7 +7,6 @@ const ContactForm = ({ onFinished, data = null }) => {
   const [affinities, setAffinities] = useState([])
   const [addingAffinity, setAddingAffinity] = useState(false)
   const [affinity, setAffinity] = useState({ color: '#666666' })
-  const network = useNetworkContext()
   const setInput = e => setContact({ ...contact, [e.target.name]: e.target.value })
   const toggleAffinity = (affinity) => setContact(x => {
     const foundAt = x.affinities.findIndex(a => a.name === affinity.name)
@@ -24,10 +22,6 @@ const ContactForm = ({ onFinished, data = null }) => {
     e.preventDefault()
     onFinished(contact)
   }
-
-  useEffect(() => {
-    network.getAffinities().then(setAffinities).catch(err => { console.log('No affinities found', err) })
-  }, [network])
 
   const fields = [
     { name: 'codename', label: 'Code Name', required: true, if: contact.gatheringId == null || contact.codename == null },

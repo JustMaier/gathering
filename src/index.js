@@ -2,12 +2,9 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import App from './App'
 import * as serviceWorker from './serviceWorker'
-import { AppContextProvider } from './contexts'
 
 ReactDOM.render(
-  <AppContextProvider>
-    <App />
-  </AppContextProvider>,
+  <App />,
   document.getElementById('root')
 )
 

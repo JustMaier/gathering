@@ -1,10 +1,10 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import styled from 'styled-components/macro'
 import { Link } from 'react-router-dom'
 import { rgba, math } from 'polished'
 import { LinkButton } from '../UI'
-import { useGatheringContext } from '../../contexts'
 import { MdAddCircle } from 'react-icons/md'
+import db from '../../db'
 
 const Nav = styled.nav`
   position: fixed;
@@ -37,12 +37,27 @@ const Logo = styled.a`
 `
 
 const Navbar = () => {
-  const { gathering } = useGatheringContext()
+  const [inGathering, setInGathering] = useState(false)
+  useEffect(() => {
+    const onActivated = () => {
+      setInGathering(true)
+    }
+    const onDeactivated = () => {
+      setInGathering(false)
+    }
+    db.on('gathering:activated', onActivated)
+    db.on('gathering:deactivated', onDeactivated)
+
+    return () => {
+      db.off('gathering:activated', onActivated)
+      db.off('gathering:deactivated', onDeactivated)
+    }
+  }, [])
 
   return (
     <Nav>
       <Logo as={Link} to='/'>Gathering</Logo>
-      {gathering && <LinkButton to='/connect' sm borderRadius='0 0 5px 5px'><MdAddCircle size='1.5em' /></LinkButton>}
+      {inGathering && <LinkButton to='/connect' sm borderRadius='0 0 5px 5px'><MdAddCircle size='1.5em' /></LinkButton>}
     </Nav>
   )
 }

@@ -1,4 +1,4 @@
-import styled from 'styled-components/macro'
+import styled, { css } from 'styled-components/macro'
 import { space, themeGet as _ } from 'styled-system'
 
 export const ListGroup = styled.div`
@@ -27,11 +27,15 @@ export const ListGroupItem = styled.a`
   font-weight: 300;
   color: inherit;
   text-decoration:none;
-  cursor: pointer;
 
-  &:hover, &:active, &:focus {
-    background: ${_('list.hover')};
-  }
+  ${p => p.selectable !== false && css`
+    cursor: pointer;
+
+    &:hover, &:active, &:focus {
+      background: ${_('list.hover')};
+    }
+  `}
+  
 
   & + & {
     border-top: 1px solid ${_('list.border')};

@@ -3,11 +3,11 @@
   "version": "0.2.0",
   "private": true,
   "dependencies": {
-    "dexie": "^2.0.4",
     "file-saver": "^2.0.1",
-    "level-js": "^4.0.1",
-    "libp2p-json-node": "file:../p2p/libp2p-json-node",
+    "ipfs": "^0.36.4",
     "md5-hash": "^1.0.1",
+    "orbit-db": "^0.21.3",
+    "orbit-db-access-controllers": "^0.2.2",
     "polished": "^3.0.3",
     "query-string": "^6.4.0",
     "react": "^16.8.4",
@@ -19,7 +19,7 @@
     "styled-components": "^4.1.3",
     "styled-normalize": "^8.0.6",
     "styled-system": "^4.0.8",
-    "datastore-level": "^0.11.0"
+    "username-generator": "^1.1.0"
   },
   "scripts": {
     "start": "react-scripts start",

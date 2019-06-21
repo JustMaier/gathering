@@ -1,51 +1,54 @@
 import React, { useState } from 'react'
 import { Button, Text, Spinner, Header, Form, Fieldset, FloatLabelInput, Box, QR, Alert } from '../components/UI'
-import { useGatheringContext } from '../contexts'
+import db from '../db'
+import Requests from './Requests'
+import Recommendations from './Recommendations'
 
 const Connect = ({ history }) => {
-  const [codename, setCodename] = useState('')
-  const [status, setStatus] = useState('pending')
-  const [error, setError] = useState(null)
-  const { gathering, actions } = useGatheringContext()
+  const [name, setName] = useState('')
+  const [alert, setAlert] = useState({ message: null, variant: 'danger' })
+  const [loading, setLoading] = useState(false)
 
-  const startConnection = async e => {
+  const connect = async e => {
     e.preventDefault()
-    setStatus('loading')
-    try {
-      const contact = await actions.connectWith(codename)
-      await gathering.addContact(contact)
-      setStatus('connected')
-    } catch (err) {
-      setStatus('pending')
-      setError(err.message)
+    setLoading(true)
+    const members = await db.queryMembers(x => x.id !== db.memberId && x.name.toLowerCase() === name.toLowerCase())
+    if (members.length === 0) {
+      setAlert({ message: 'We couldn\'t find anyone with that name. Please check the name and try again', variant: 'danger' })
+    } else {
+      for (let i in members) {
+        const member = members[i]
+        try {
+          await db.sendRequest(member.id)
+        } catch (err) {
+          setAlert({ message: 'We had trouble sending your request, please refresh and try again.', variant: 'danger' })
+        }
+      }
+      setName('')
+      setAlert({ message: 'Your request to connect has been sent', variant: 'success' })
     }
+    setLoading(false)
   }
 
-  // Render
-  if (status === 'loading') { return <Spinner /> }
-
-  if (status === 'connected') {
-    return (
-      <Box flexDirection='column' alignItems='center'>
-        <Header>Connected</Header>
-        <Text fontSize='1' color='muted' mb='4'>You've successfully connected with {codename}</Text>
-        <Button onClick={() => history.goBack()}>Go Back</Button>
-      </Box>
-    )
-  }
+  if (loading) return <Spinner />
 
   return (
-    <Form onSubmit={startConnection}>
-      <Header>Connect</Header>
-      <Text fontSize='1' color='muted' mb='4'>Your codename is {gathering.contact.codename}</Text>
-      {error && <Alert variant='danger'>{error}</Alert>}
-      <Fieldset>
-        <FloatLabelInput name='codename' value={codename} label='Their Code Name' onChange={(e) => setCodename(e.target.value)} required />
-      </Fieldset>
-      <Button as='button' type='submit' block>Connect</Button>
-      <Text mt='5' color='muted' fontSize='1' textAlign='center'>Not in the gathering yet? Scan this QR code!</Text>
-      <QR mt='2' mb='4' link={`http://${window.location.host}/gatherings/join?id=${gathering.id}&name=${gathering.name}&end=${gathering.end}`} />
-    </Form>
+    <>
+      {alert.message ? <Alert variant={alert.variant}>{alert.message}</Alert> : null}
+      <Recommendations mb='4' />
+      <Requests mb='4' />
+      <Form onSubmit={connect}>
+        <Header>Connect</Header>
+        <Fieldset>
+          <FloatLabelInput name='name' value={name} label='Their Name' onChange={(e) => setName(e.target.value)} required />
+        </Fieldset>
+        <Button as='button' type='submit' block>Connect</Button>
+      </Form>
+      <Box flexDirection='column'>
+        <Text mt='5' color='muted' fontSize='1' textAlign='center'>Not in the gathering yet? Scan this QR code!</Text>
+        <QR mt='2' mb='4' link={db.shareableAddress} />
+      </Box>
+    </>
   )
 }
 
