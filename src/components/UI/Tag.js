@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components/macro'
-import { math, lighten, rgba } from 'polished'
+import { lighten, rgba } from 'polished'
 import { space } from 'styled-system'
 
 export const TagList = styled.div`

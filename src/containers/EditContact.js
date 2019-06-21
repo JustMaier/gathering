@@ -15,7 +15,7 @@ const defaultFields = [
 ]
 
 const EditContact = ({ history }) => {
-  const [fields, setFields] = useState(defaultFields)
+  const [fields] = useState(defaultFields)
   const [contact, setContact] = useState(null)
   const [avatarImage, setAvatarImage] = useState(null)
   const [updatedAvatar, setUpdatedAvatar] = useState(false)

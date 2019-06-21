@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react'
-import { Button, Header } from '../components/UI'
+import React from 'react'
+import { Button } from '../components/UI'
 import Me from './Me'
 import Contacts from './Contacts'
 import db from '../db'
