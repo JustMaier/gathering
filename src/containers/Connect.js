@@ -12,7 +12,7 @@ const Connect = ({ history }) => {
   const connect = async e => {
     e.preventDefault()
     setLoading(true)
-    const members = await db.queryMembers(x => x.id !== db.memberId && x.name.toLowerCase() === name.toLowerCase())
+    const members = await db.queryMembers(x => x.id !== db.memberId && x.name.trim().toLowerCase() === name.trim().toLowerCase())
     if (members.length === 0) {
       setAlert({ message: 'We couldn\'t find anyone with that name. Please check the name and try again', variant: 'danger' })
     } else {

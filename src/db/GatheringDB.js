@@ -417,7 +417,7 @@ class GatheringDB extends EventEmitter {
     // Update member record
     this.my.profile = {
       ...this.my.profile,
-      name: contactInfo.name,
+      name: contactInfo.name.trim(),
       avatar: contactInfo.avatar,
       affinities: contactInfo.affinities
     }
