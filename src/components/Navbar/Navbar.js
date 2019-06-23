@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { ReactComponent as LogoSVG } from './logo.svg'
 import styled from 'styled-components/macro'
 import { Link } from 'react-router-dom'
 import { rgba, math } from 'polished'
@@ -31,9 +32,11 @@ const Logo = styled.a`
   text-align: center;
   box-shadow: 0px 3px 10px ${rgba('#000', 0.3)};
 
-  text-transform: uppercase;
-  font-weight: 700;
-  font-size:1.25em;
+  svg {
+    vertical-align:middle;
+    height: 25px;
+    fill: #fff
+  }
 `
 
 const Navbar = () => {
@@ -56,7 +59,7 @@ const Navbar = () => {
 
   return (
     <Nav>
-      <Logo as={Link} to='/'>Gathering</Logo>
+      <Logo as={Link} to='/'><LogoSVG /></Logo>
       {inGathering && <LinkButton to='/connect' sm borderRadius='0 0 5px 5px'><MdAddCircle size='1.5em' /></LinkButton>}
     </Nav>
   )
