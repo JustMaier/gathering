@@ -65,6 +65,7 @@ export const Input = styled.input`
   position: relative;
   appearance: none;
   box-shadow: none;
+  border-radius: 0px;
 
   &:focus {
     box-shadow: none;

@@ -6,13 +6,13 @@ import db from '../db'
 
 const initialAffinity = { color: '#666666', name: '' }
 
-const Affinities = ({ canEdit, onToggle, value = [] }) => {
+const Affinities = ({ canEdit, onToggle, value = [], ...props }) => {
   const [affinities, setAffinities] = useState(db.getAffinities())
   if (!canEdit) {
     return (
-      <TagList>
+      <TagList {...props}>
         { value.map(aKey => {
-          const { color, name } = affinities[aKey]
+          const { color, name } = affinities.find(a => a.name === aKey)
           return <Tag key={aKey} band={color}>{name}</Tag>
         })}
       </TagList>

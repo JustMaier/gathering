@@ -67,6 +67,7 @@ const Tile = styled(({ header, children, className }) => (
     .viewport {
       display: inline-flex;
       animation: slide 10s ease infinite alternate;
+      tranform: translateZ(1);
       > div {
         width: ${tileSettings.width};
       }

@@ -344,6 +344,10 @@ class GatheringDB extends EventEmitter {
     return requests
   }
 
+  getRequestsCount () {
+    return Object.keys(this.my.connectionRequests.all).length
+  }
+
   async acceptRequest (id) {
     const { cid, key } = asymmetricEncryption.decrypt(this.my.asymmetricKeyPair.private, this.my.connectionRequests.get(id), this.memberKeys[id])
     await this.setConnectionData(id, cid, key)
@@ -554,6 +558,22 @@ class GatheringDB extends EventEmitter {
       }))
 
     return members
+  }
+
+  getRecommendationCount () {
+    const memberIds = {}
+    Object.keys(this.my.recommendations.all).forEach(fromId => {
+      this.my.recommendations.all[fromId].forEach(memberId => {
+        if (!memberIds[memberId]) memberIds[memberId] = []
+        memberIds[memberId].push(fromId)
+      })
+    })
+
+    return Object.keys(memberIds)
+      .filter(id => {
+        const notConnected = this.memberDbs[id].connections.get(this.memberId) == null && this.memberDbs[id].connectionRequests.get(this.memberId) == null
+        return notConnected
+      }).length
   }
 
   async sendRecommendation (toId, forId) {

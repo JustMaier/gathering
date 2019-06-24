@@ -22,6 +22,7 @@ export const Button = styled.a`
   border: none;
   box-shadow: 0px 1px 5px ${rgba('#000', 0.3)};
   text-decoration: none;
+  position: relative;
   ${p => p.lg && css`
     font-size: 2em;
     font-weight: 300;

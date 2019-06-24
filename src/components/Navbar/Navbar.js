@@ -3,7 +3,7 @@ import { ReactComponent as LogoSVG } from './logo.svg'
 import styled from 'styled-components/macro'
 import { Link } from 'react-router-dom'
 import { rgba, math } from 'polished'
-import { LinkButton } from '../UI'
+import { LinkButton, Badge } from '../UI'
 import { MdAddCircle } from 'react-icons/md'
 import db from '../../db'
 
@@ -46,12 +46,25 @@ const Logo = styled.a`
 
 const Navbar = () => {
   const [inGathering, setInGathering] = useState(false)
+  const [notificationCount, setNotificationCount] = useState(0)
   useEffect(() => {
+    const updateNotificationCount = () => {
+      setNotificationCount(db.getRecommendationCount() + db.getRequestsCount())
+    }
     const onActivated = () => {
       setInGathering(true)
+      db.my.recommendations.events.on('replicated', updateNotificationCount)
+      db.my.recommendations.events.on('write', updateNotificationCount)
+      db.my.connectionRequests.events.on('replicated', updateNotificationCount)
+      db.my.connectionRequests.events.on('write', updateNotificationCount)
+      updateNotificationCount()
     }
     const onDeactivated = () => {
       setInGathering(false)
+      db.my.recommendations.events.off('replicated', updateNotificationCount)
+      db.my.recommendations.events.off('write', updateNotificationCount)
+      db.my.connectionRequests.events.off('replicated', updateNotificationCount)
+      db.my.connectionRequests.events.off('write', updateNotificationCount)
     }
     db.on('gathering:activated', onActivated)
     db.on('gathering:deactivated', onDeactivated)
@@ -65,7 +78,12 @@ const Navbar = () => {
   return (
     <Nav>
       <Logo as={Link} to='/'><LogoSVG /></Logo>
-      {inGathering && <LinkButton to='/connect' sm borderRadius='0 0 5px 5px' className='add'><MdAddCircle size='1.5em' /></LinkButton>}
+      {inGathering &&
+        <LinkButton to='/connect' sm borderRadius='0 0 5px 5px' className='add'>
+          <MdAddCircle size='1.5em' />
+          {notificationCount ? <Badge>{notificationCount}</Badge> : null}
+        </LinkButton>
+      }
     </Nav>
   )
 }

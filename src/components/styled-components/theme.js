@@ -1,10 +1,11 @@
-import { lighten, rgba } from 'polished'
+import { lighten, darken, rgba } from 'polished'
 
 export const theme = {
   colors: {
     bg: '#333',
     primary: '#5c50ca',
-    'primary-light': lighten(0.05, '#5c50ca'),
+    primaryDark: darken(0.05, '#5c50ca'),
+    primaryLight: lighten(0.05, '#5c50ca'),
     secondary: '#fc5090',
     success: '#2ecc71',
     danger: '#e74c3c',

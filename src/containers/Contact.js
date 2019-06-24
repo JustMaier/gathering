@@ -1,6 +1,7 @@
 /* global Blob */
 import React, { useState, useEffect } from 'react'
 import { ListGroup, ListGroupItem, Button, Header, Spinner, Stars, Text, Box, CIDPhoto } from '../components/UI'
+import Affinities from './Affinities'
 import { saveAs } from 'file-saver'
 import { ContactList, ContactListItem } from '../components/ContactList'
 import StatusIndicator from '../components/StatusIndicator'
@@ -68,8 +69,8 @@ const Contact = ({ history, match: { params: { id: contactId } } }) => {
         {contact.email && <ListGroupItem as='a' href={`mailto:${contact.email}`}><MdEmail />{contact.email}</ListGroupItem>}
         {contact.phone && <ListGroupItem as='a' href={`tel:${contact.phone}`}><MdPhone />{contact.phone}</ListGroupItem>}
         {contact.location && <ListGroupItem as='div'><MdLocationCity />{contact.location}</ListGroupItem>}
-        <ListGroupItem as='div' selectable={false}><MdLocalOffer />{contact.affinities.join(', ')}</ListGroupItem>
       </ListGroup>
+      <Affinities value={contact.affinities} mb='3' />
       <Button as='button' mb='3' block onClick={deleteContact} bg='danger'>Delete</Button>
       <Button as='button' mb='4' block onClick={toggleRecommending}>Send Recommendation</Button>
       {recommending && (
