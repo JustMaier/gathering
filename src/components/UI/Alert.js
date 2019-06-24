@@ -20,7 +20,7 @@ export const Alert = Styled.div`
   position: fixed;
   top: -180px;
   margin: 0 5px;
-  width: calc(100% - ${p => math(`${p.theme.sizes.gutter} * 2`)} + 10px);
+  width: calc(100% - ${p => math(`(${p.theme.sizes.gutter} * 2) + 10`)});
   max-width: ${p => math(`${p.theme.sizes.container} - 10px`)};
   padding: 65px 15px 15px;
   ${p => alertStyles[p.variant] || alertStyles.default}
@@ -31,6 +31,7 @@ export const Alert = Styled.div`
   transform: translateZ(0);
   transition: top 1s ease;
   font-weight:300;
+  z-index: 99;
 
   p {
     margin: 0 0 10px;

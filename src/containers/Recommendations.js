@@ -20,7 +20,6 @@ const Recommendations = ({ ...props }) => {
 
   if (recommendations.length === 0) return null
 
-  console.log(recommendations)
   return (
     <Box flexDirection='column' {...props}>
       <Header fontSize='3' mb='1'>Recommendations</Header>

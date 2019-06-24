@@ -2,6 +2,9 @@ import { EventEmitter } from 'events'
 import AccessControllers from './AccessControllers'
 import UsernameGenerator from 'username-generator'
 import resizeImage from '../shared/resizeImage'
+import AwardEngine, { trackedEvents } from './AwardEngine'
+import * as symmetricEncryption from '../shared/symmetricEncryption'
+import * as asymmetricEncryption from '../shared/asymmetricEncryption'
 
 export const STARS_LIMIT = 3
 
@@ -36,8 +39,8 @@ class GatheringDB extends EventEmitter {
       config: {
         Addresses: {
           Swarm: [
-            // Use IPFS dev signal server
             '/dns4/ws-star.discovery.libp2p.io/tcp/443/wss/p2p-websocket-star'
+            // process.env.REACT_APP_SIGNALSERVER
           ]
         }
       }
@@ -53,6 +56,22 @@ class GatheringDB extends EventEmitter {
       AccessControllers
     })
     this.memberId = this.orbitdb.identity.id
+    this.awardEngine = new AwardEngine(this.memberId, {
+      awards: [
+        {
+          name: 'Smoozer',
+          property: 'requestsAccepted'
+        },
+        {
+          name: 'Cupid',
+          property: 'recommendations'
+        },
+        {
+          name: 'MVP',
+          property: 'points'
+        }
+      ]
+    })
 
     this.defaultOptions = {
       accessController: { write: [this.memberId] }
@@ -75,28 +94,15 @@ class GatheringDB extends EventEmitter {
 
     // Gatherings
     // ==================
-    this.gatherings = await this.orbitdb.kvstore('gatherings')
+    this.gatherings = await this.orbitdb.kvstore('gatherings', { replicate: false })
     await this.gatherings.load()
 
-    this.appSettings = await this.orbitdb.kvstore('appSettings')
+    this.appSettings = await this.orbitdb.kvstore('appSettings', { replicate: false })
     await this.appSettings.load()
-
-    // const activeGathering = this.appSettings.get('activeGathering')
-    // if (activeGathering) this.activateGathering(activeGathering)
 
     this.emit('ready', this)
     this.ready = true
   }
-
-  /* #region Encryption */
-  encrypt (data, key) {
-    return JSON.stringify(data)
-  }
-
-  decrypt (data, key) {
-    return JSON.parse(data)
-  }
-  /* #endregion */
 
   /* #region  Gathering */
   getGatherings () {
@@ -107,7 +113,7 @@ class GatheringDB extends EventEmitter {
     const start = new Date()
     console.log('start')
     await this.appSettings.put('activeGathering', key)
-    const { address, cid, ...rest } = this.gatherings.get(key)
+    const { address, cid, shareableKey, asymmetricKeyPair, ...rest } = this.gatherings.get(key)
     this.gathering = await this.orbitdb.open(address, { sync: true })
     await this.gathering.load()
     console.log('gathering', new Date() - start)
@@ -117,6 +123,8 @@ class GatheringDB extends EventEmitter {
       this.gatherings.put(key, {
         address,
         cid,
+        shareableKey,
+        asymmetricKeyPair,
         ...rest,
         name: this.gathering.get('name'),
         end: this.gathering.get('end')
@@ -124,13 +132,12 @@ class GatheringDB extends EventEmitter {
     }
 
     await Promise.all(['events', 'affinities', 'media', 'members'].map(async key => {
-      console.log(this.gathering.get(key))
       this[key] = await this.orbitdb.open(this.gathering.get(key))
       await this[key].load()
     }))
 
     // Load user profile
-    this.my = { cid }
+    this.my = { cid, shareableKey, asymmetricKeyPair }
     try {
       this.my.profile = await this.members.get(this.memberId)
       if (!this.my.profile) throw new Error('You\'re not in the gathering')
@@ -140,6 +147,7 @@ class GatheringDB extends EventEmitter {
 
       this.my.profile = {
         id: this.memberId,
+        publicKey: asymmetricKeyPair.public,
         name: UsernameGenerator.generateUsername(' '),
         avatar: null,
         affinities: [],
@@ -175,6 +183,12 @@ class GatheringDB extends EventEmitter {
     Object.keys(this.memberDbs[this.memberId]).forEach(key => {
       this.my[key] = this.memberDbs[this.memberId][key]
     })
+
+    // Event Events
+    this.events.events.on('replicated', (...args) => this.checkForActions(...args))
+
+    // Prep awards
+    this.updateAwards()
 
     // Shareable address
     const encodedAddress = encodeURI(btoa(this.gathering.address.toString()))
@@ -220,7 +234,9 @@ class GatheringDB extends EventEmitter {
       key,
       name: gathering.name,
       end: gathering.end,
-      address: gatheringDb.address.toString()
+      address: gatheringDb.address.toString(),
+      shareableKey: symmetricEncryption.generateKey(),
+      asymmetricKeyPair: asymmetricEncryption.generateKeyPair()
     })
     await gatheringDb.close()
 
@@ -234,7 +250,9 @@ class GatheringDB extends EventEmitter {
     const key = address.split('/').slice(3).join('')
     await this.gatherings.put(key, {
       key,
-      address
+      address,
+      shareableKey: symmetricEncryption.generateKey(),
+      asymmetricKeyPair: asymmetricEncryption.generateKeyPair()
     })
 
     const gathering = await this.orbitdb.open(address, { sync: true })
@@ -247,12 +265,25 @@ class GatheringDB extends EventEmitter {
   }
   /* #endregion */
 
+  /* #region Awards */
+  async updateAwards (force = false) {
+    if (!force && this.listenerCount('awards:updated') === 0) return
+
+    const nameMap = {}
+    Object.keys(this.members.all).forEach(id => { nameMap[id] = this.members.all[id].name })
+
+    this.awards = []
+    this.awards = this.awardEngine.processEvents(this.events, nameMap)
+    this.emit('awards:updated', this.awards)
+  }
+  /* #endregion */
+
   /* #region IPFS */
-  async getJsonFromCid (cid) {
+  async getJsonFromCid (cid, key) {
     const files = await this.node.get(cid)
     if (!files[0]) return null
 
-    const json = JSON.parse(files[0].content.toString())
+    const json = symmetricEncryption.decrypt(files[0].content.toString(), key)
     return json
   }
 
@@ -278,6 +309,25 @@ class GatheringDB extends EventEmitter {
   /* #endregion */
 
   /* #region Events */
+  async checkForActions (addr, count) {
+    const entries = this.events.iterator({ limit: count, reverse: true }).collect().map(e => ({
+      fromId: e.identity.id,
+      ...e.payload.value
+    }))
+
+    for (let i in entries) {
+      const entry = entries[i]
+
+      if (entry.type === 'contact:update' && this.my.connections.get(entry.fromId)) {
+        const { key } = this.getConnectionData(entry.fromId)
+        const cid = symmetricEncryption.decrypt(entry.payload, key)
+        await this.setConnectionData(entry.fromId, cid, key)
+      }
+    }
+
+    if (entries.some(({ type }) => trackedEvents.includes(type))) this.updateAwards()
+  }
+
   async trackEvent (event) {
     console.log('track', event)
     await this.events.add({ ...event, time: new Date().getTime() })
@@ -286,7 +336,6 @@ class GatheringDB extends EventEmitter {
 
   /* #region Requests */
   async getRequests () {
-    console.log(this.memberId, this.my.connectionRequests.all)
     const requests = await Promise.all(Object.keys(this.my.connectionRequests.all).map(async fromId => {
       const member = this.getMember(fromId)
       return member
@@ -296,8 +345,10 @@ class GatheringDB extends EventEmitter {
   }
 
   async acceptRequest (id) {
-    await this.my.connections.put(id, this.my.connectionRequests.get(id))
+    const { cid, key } = asymmetricEncryption.decrypt(this.my.asymmetricKeyPair.private, this.my.connectionRequests.get(id), this.memberKeys[id])
+    await this.setConnectionData(id, cid, key)
     await this.my.connectionRequests.del(id)
+    this.trackEvent({ type: 'connections:accept', to: id })
 
     const haventSentRequest = !this.memberDbs[id].connectionRequests.get(this.memberId) && !this.memberDbs[id].connections.get(this.memberId)
     if (haventSentRequest) await this.sendRequest(id)
@@ -305,12 +356,13 @@ class GatheringDB extends EventEmitter {
 
   async declineRequest (id) {
     await this.my.connectionRequests.del(id)
+    this.trackEvent({ type: 'connections:decline', to: id })
   }
 
   async sendRequest (id) {
     if (this.memberDbs[id].connections.get(this.memberId) || this.memberDbs[id].connectionRequests.get(this.memberId)) return
-    await this.memberDbs[id].connectionRequests.put(this.memberId, this.encrypt(this.my.cid, id))
-    await this.trackEvent({ type: 'connections:send', to: id })
+    await this.memberDbs[id].connectionRequests.put(this.memberId, asymmetricEncryption.encrypt(this.my.asymmetricKeyPair.private, { cid: this.my.cid, key: this.my.shareableKey }, this.memberKeys[id]))
+    await this.trackEvent({ type: 'connections:request', to: id })
   }
 
   /* #endregion */
@@ -326,12 +378,15 @@ class GatheringDB extends EventEmitter {
 
   async openMemberDatabases () {
     if (!this.memberDbs) this.memberDbs = {}
+    if (!this.memberKeys) this.memberKeys = {}
     const memberDbIds = Object.keys(this.memberDbs)
     console.log(Object.keys(this.members.all).length)
 
     const toOpen = []
     Object.keys(this.members.all).filter(x => !memberDbIds.includes(x)).forEach(memberId => {
       const member = this.members.get(memberId)
+      this.memberKeys[memberId] = member.publicKey
+
       Object.keys(member)
         .map(key => ({ key, value: member[key] }))
         .filter(x => x.value && typeof x.value === 'string' && x.value.startsWith('/orbitdb/'))
@@ -362,46 +417,46 @@ class GatheringDB extends EventEmitter {
   }
   /* #endregion */
 
-  /* #region Awards */
-  async getAwards () {
-    // TODO
-
-  }
-  /* #endregion */
-
   /* #region Contacts */
+  async setConnectionData (id, cid, key) {
+    this.my.connections.put(id, symmetricEncryption.encrypt({ cid, key }, this.my.asymmetricKeyPair.private))
+  }
+
+  getConnectionData (id) {
+    return symmetricEncryption.decrypt(this.my.connections.get(id), this.my.asymmetricKeyPair.private)
+  }
+
   async getContacts () {
     const contactCids = Object.keys(this.my.connections.all).map(fromId => ({
       fromId,
-      cid: this.decrypt(this.my.connections.all[fromId], this.privateKey)
+      ...this.getConnectionData(fromId)
     }))
     // TODO if this is slow, just send the CID and resolve on the front end
-    const contacts = await Promise.all(contactCids.map(async ({ fromId, cid }) => ({
-      ...await this.getJsonFromCid(cid),
-      stars: this.memberDbs[fromId].stars.get(this.memberId) || 0,
+    const contacts = await Promise.all(contactCids.map(async ({ fromId, cid, key }) => ({
+      ...await this.getJsonFromCid(cid, key),
+      stars: this.memberDbs[fromId] && this.memberDbs[fromId].stars ? this.memberDbs[fromId].stars.get(this.memberId) || 0 : 0,
       id: fromId
     })))
 
-    console.log(contacts)
     return contacts
   }
 
   async getContact (id) {
-    const cid = this.decrypt(this.my.connections.get(id), this.privateKey)
+    const { cid, key } = this.getConnectionData(id)
     const contact = {
-      ...await this.getJsonFromCid(cid),
+      ...await this.getJsonFromCid(cid, key),
       id
     }
 
     // TODO more props?
     const member = this.getMember(id)
-    contact.stars = member.dbs.stars.get(this.memberId) || 0
+    contact.stars = member.dbs.stars ? member.dbs.stars.get(this.memberId) || 0 : 0
 
     return contact
   }
 
   async getMe () {
-    return this.getJsonFromCid(this.my.cid)
+    return this.getJsonFromCid(this.my.cid, this.my.shareableKey)
   }
 
   async updateMe (contactInfo) {
@@ -425,7 +480,7 @@ class GatheringDB extends EventEmitter {
 
     // Update contact record
     // TODO encrypt this with a key that is shared when connecting
-    const buffer = this.IPFS.Buffer(JSON.stringify(contactInfo))
+    const buffer = this.IPFS.Buffer(symmetricEncryption.encrypt(contactInfo, this.my.shareableKey))
     const result = await this.node.add(buffer)
     this.my.cid = result[0].hash
 
@@ -434,6 +489,8 @@ class GatheringDB extends EventEmitter {
       ...this.gatherings.get(gatheringKey),
       cid: this.my.cid
     })
+
+    this.trackEvent({ type: 'contact:update', payload: symmetricEncryption.encrypt(this.my.cid, this.my.shareableKey) })
 
     return this.my.cid
   }

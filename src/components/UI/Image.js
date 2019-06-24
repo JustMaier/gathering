@@ -3,12 +3,26 @@ import styled from 'styled-components'
 import { space, size, boxShadow, borderRadius, border } from 'styled-system'
 import db from '../../db'
 
-export const Image = styled.img`
+export const Image = styled(({ src, alt, className }) => (
+  <div className={className}>
+    <img src={src} alt={alt} />
+  </div>
+))`
   ${space}
   ${size}
   ${boxShadow}
   ${borderRadius}
   ${border}
+  overflow:hidden;
+  position:relative;
+
+  img {
+    position:absolute;
+    top:50%;
+    left:50%;
+    width:100%;
+    transform: translate(-50%, -50%);
+  }
 `
 Image.propTypes = {
   ...space.propTypes,

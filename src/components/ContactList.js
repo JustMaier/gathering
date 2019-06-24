@@ -13,13 +13,22 @@ const ContactListGroupItem = styled(ListGroupItem)`
 
   .img{
     grid-area: icon;
-    padding:3px;
-    height:100%;
+    margin:3px;
+    width:auto;
+    height:calc(100% - 6px);
+    overflow:hidden;
+    position: relative;
+    border-radius:4px;
 
     img {
-      border-radius:4px;
       width:100%;
       height:auto;
+      box-shadow:none;
+      border:none;
+      position:absolute;
+      top:50%;
+      left:50%;
+      transform:translate(-50%, -50%)
     }
   }
 `
@@ -50,9 +59,7 @@ const ReviewableListGroupItem = styled.div`
 export const ContactListItem = ({ id, name, organization, avatar, stars, status, onClick = null, onApprove = null, onDecline = null, approveIcon: ApproveIcon = MdCheckCircle }) => {
   const content = (
     <React.Fragment>
-      <div className='img'>
-        <CIDPhoto src={avatar} />
-      </div>
+      <CIDPhoto className='img' src={avatar} />
       <Box alignItems='center'>
         <Box flexDirection='column'>
           <Text fontWeight='800'>{name}</Text>

@@ -4,6 +4,7 @@ export const theme = {
   colors: {
     bg: '#333',
     primary: '#5c50ca',
+    'primary-light': lighten(0.05, '#5c50ca'),
     secondary: '#fc5090',
     success: '#2ecc71',
     danger: '#e74c3c',
@@ -31,7 +32,8 @@ export const theme = {
     'top': '5px 5px 0 0'
   },
   shadows: {
-    lg: '0px 3px 10px rgba(0,0,0,.3)'
+    lg: '0px 3px 10px rgba(0,0,0,.3)',
+    sm: '0px 2px 5px rgba(0,0,0,.3)'
   },
   borders: {
     faint: '1px solid rgba(255,255,255, .1)'

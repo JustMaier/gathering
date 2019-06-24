@@ -12,11 +12,16 @@ const Nav = styled.nav`
   width:calc(100vw - ${p => math(`${p.theme.sizes.gutter} * 2`)});
   z-index: 100;
   display:flex;
-  align-items:flex-start;
   justify-content: space-between;
 
   @media(min-width: ${p => p.theme.sizes.breakpoint}){
     width:${p => p.theme.sizes.container};
+  }
+
+  .add {
+    display:flex;
+    justify-content:center;
+    align-items:center;
   }
 `
 
@@ -60,7 +65,7 @@ const Navbar = () => {
   return (
     <Nav>
       <Logo as={Link} to='/'><LogoSVG /></Logo>
-      {inGathering && <LinkButton to='/connect' sm borderRadius='0 0 5px 5px'><MdAddCircle size='1.5em' /></LinkButton>}
+      {inGathering && <LinkButton to='/connect' sm borderRadius='0 0 5px 5px' className='add'><MdAddCircle size='1.5em' /></LinkButton>}
     </Nav>
   )
 }

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom'
 import queryString from 'query-string'
+import { hot } from 'react-hot-loader'
 
 import { ThemeProvider } from 'styled-components/macro'
 import { GlobalStyle } from './components/styled-components/global'
@@ -89,4 +90,4 @@ const App = () => {
   )
 }
 
-export default App
+export default hot(module)(App)
