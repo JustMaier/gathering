@@ -12,12 +12,17 @@ import generateVCard from '../shared/generateVCard'
 
 const Contact = ({ history, match: { params: { id: contactId } } }) => {
   const [recommending, setRecommending] = useState(false)
-  const [contact, setContact] = useState(db.getContact(contactId))
+  const [contact, setContact] = useState(null)
   const [contacts, setContacts] = useState([])
+  const [affinities, setAffinities] = useState([])
   const [recommendations, setRecommendations] = useState({})
   useEffect(() => {
-    const updateContact = () => setContact(db.getContact(contactId))
+    const updateContact = () => {
+      setContact(db.getContact(contactId))
+      setAffinities(db.getAffinitiesFor(contactId))
+    }
     db.gathering.events.on('replicated', updateContact)
+    updateContact()
 
     return () => {
       db.gathering.events.off('replicated', updateContact)
@@ -27,8 +32,8 @@ const Contact = ({ history, match: { params: { id: contactId } } }) => {
     if (recommending && contacts.length === 0) setContacts(db.getContacts())
   }, [recommending])
 
-  const download = () => {
-    const blob = new Blob([generateVCard(contact)], { type: 'text/vcard' })
+  const download = async () => {
+    const blob = new Blob([generateVCard(contact, db.gathering.all, contact.avatar ? await db.getImageFromCid(contact.avatar) : null)], { type: 'text/vcard' })
     saveAs(blob, `${contact.name}.vcf`)
   }
   const toggleRecommending = () => setRecommending(x => !x)
@@ -73,7 +78,7 @@ const Contact = ({ history, match: { params: { id: contactId } } }) => {
         {contact.phone && <ListGroupItem as='a' href={`tel:${contact.phone}`}><MdPhone />{contact.phone}</ListGroupItem>}
         {contact.location && <ListGroupItem as='div'><MdLocationCity />{contact.location}</ListGroupItem>}
       </ListGroup>
-      <Affinities value={contact.affinities} mb='3' />
+      <Affinities value={affinities} mb='3' />
       <Button as='button' mb='3' block onClick={deleteContact} bg='danger'>Delete</Button>
       <Button as='button' mb='4' block onClick={toggleRecommending}>Send Recommendation</Button>
       {recommending && (

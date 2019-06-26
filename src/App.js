@@ -14,7 +14,7 @@ import Gathering from './containers/Gathering'
 import EditContact from './containers/EditContact'
 import Contact from './containers/Contact'
 import CreateGathering from './containers/CreateGathering'
-import { Spinner } from './components/UI'
+import { Spinner, Alert } from './components/UI'
 import db from './db'
 
 const routes = [
@@ -28,6 +28,7 @@ const routes = [
 
 const App = () => {
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [gathering, setGathering] = useState(null)
   useEffect(() => {
     // Watch for Gathering Loading
@@ -58,6 +59,7 @@ const App = () => {
         setLoading(false)
       }
     })
+    db.on('error', (err) => setError(err.message))
 
     return () => {
       // Remove watch for Gathering Loading
@@ -71,7 +73,7 @@ const App = () => {
       <BrowserRouter>
         <GlobalStyle />
         <Layout>
-          {/* {recommendation && <Alert>{recommendation.recommender.name} recommended <strong>{recommendation.name}</strong></Alert>} */}
+          {error && <Alert variant='danger' onClick={() => setError(null)}>{error}</Alert>}
           { loading ? <Spinner />
             : <Switch>
               {routes

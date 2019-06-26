@@ -36,7 +36,7 @@ class GatheringDB extends EventEmitter {
       }
     })
 
-    this.node.on('error', e => { throw e })
+    this.node.on('error', e => { this.emit('error', e) })
     this.node.on('ready', this._init.bind(this))
   }
 
@@ -329,6 +329,10 @@ class GatheringDB extends EventEmitter {
       const affinity = this.gathering.affinities[name]
       return { ...affinity, name, memberCount: Object.keys(affinity.members).length }
     }).sort((a, b) => a.memberCount > b.memberCount)
+  }
+
+  getAffinitiesFor (id) {
+    return this.gathering.getAffinitiesFor(id)
   }
 
   getMyAffinities () {

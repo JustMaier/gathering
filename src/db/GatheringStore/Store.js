@@ -221,7 +221,11 @@ export default class GatheringStore extends Store {
   }
 
   get myAffinities () {
-    return Object.keys(this.affinities).filter(name => this.affinities[name].members[this.id])
+    return this.getAffinitiesFor(this.id)
+  }
+
+  getAffinitiesFor (id) {
+    return Object.keys(this.affinities).filter(name => this.affinities[name].members[id])
   }
 
   hasAffinity (name) {
