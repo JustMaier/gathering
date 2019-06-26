@@ -5,12 +5,13 @@ import db from '../db'
 
 const fields = [
   { name: 'name', label: 'Gathering Name', required: true },
-  { name: 'end', label: 'Gathering End Time', type: 'datetime-local', required: true }
+  { name: 'place', label: 'Location', required: true },
+  { name: 'end', label: 'End Time', type: 'datetime-local', required: true }
 ]
 
 const CreateGathering = ({ location }) => {
   const defaultEndDate = addDays(new Date(), 1)
-  const [gathering, setGathering] = useState({ name: '', end: `${defaultEndDate.toISOString().split('T')[0]}T09:00:00` })
+  const [gathering, setGathering] = useState({ name: '', place: '', end: `${defaultEndDate.toISOString().split('T')[0]}T09:00:00` })
   const [loading, setLoading] = useState(false)
 
   const setInput = e => setGathering({ ...gathering, [e.target.name]: e.target.value })
