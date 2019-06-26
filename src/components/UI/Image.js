@@ -41,10 +41,14 @@ Photo.defaultProps = {
   borderRadius: '5px'
 }
 
+const CIDPhotoCache = {}
 export const CIDPhoto = ({ src: cid, placeholder = '/img/placeholder.jpg', ...props }) => {
-  const [src, setSrc] = useState(placeholder)
+  const [src, setSrc] = useState(CIDPhotoCache[cid] || placeholder)
   useEffect(() => {
-    db.getImageFromCid(cid).then(setSrc)
+    db.getImageFromCid(cid).then(src => {
+      CIDPhotoCache[cid] = src
+      setSrc(CIDPhotoCache[cid])
+    })
   }, [cid])
 
   return (

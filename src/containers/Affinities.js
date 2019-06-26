@@ -21,11 +21,12 @@ const Affinities = ({ canEdit, onToggle, value = [], ...props }) => {
 
   useEffect(() => {
     const updateAffinities = () => setAffinities(db.getAffinities())
-    db.affinities.events.on('replicated', updateAffinities)
-    db.affinities.events.on('write', updateAffinities)
+    db.gathering.events.on('replicated', updateAffinities)
+    db.gathering.events.on('write', updateAffinities)
 
     return () => {
-      db.affinities.events.off('replicated', updateAffinities)
+      db.gathering.events.off('replicated', updateAffinities)
+      db.gathering.events.off('write', updateAffinities)
     }
   }, [])
 

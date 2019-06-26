@@ -53,18 +53,12 @@ const Navbar = () => {
     }
     const onActivated = () => {
       setInGathering(true)
-      db.my.recommendations.events.on('replicated', updateNotificationCount)
-      db.my.recommendations.events.on('write', updateNotificationCount)
-      db.my.connectionRequests.events.on('replicated', updateNotificationCount)
-      db.my.connectionRequests.events.on('write', updateNotificationCount)
+      db.gathering.events.on('replicated', updateNotificationCount)
+      db.gathering.events.on('write', updateNotificationCount)
       updateNotificationCount()
     }
     const onDeactivated = () => {
       setInGathering(false)
-      db.my.recommendations.events.off('replicated', updateNotificationCount)
-      db.my.recommendations.events.off('write', updateNotificationCount)
-      db.my.connectionRequests.events.off('replicated', updateNotificationCount)
-      db.my.connectionRequests.events.off('write', updateNotificationCount)
     }
     db.on('gathering:activated', onActivated)
     db.on('gathering:deactivated', onDeactivated)

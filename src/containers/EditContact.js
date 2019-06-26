@@ -14,29 +14,27 @@ const defaultFields = [
   { name: 'location', label: 'Location' }
 ]
 
+const initialContact = {}
+defaultFields.forEach(x => { initialContact[x.name] = '' })
+
 const EditContact = ({ history }) => {
   const [fields] = useState(defaultFields)
-  const [contact, setContact] = useState(null)
+  const [contact, setContact] = useState(initialContact)
+  const [affinities, setAffinities] = useState([])
   const [avatarImage, setAvatarImage] = useState(null)
   const [updatedAvatar, setUpdatedAvatar] = useState(false)
 
   useEffect(() => {
-    db.getMe().then(contact => {
-      fields.forEach(({ name }) => {
-        contact[name] = contact[name] || ''
-      })
-
-      if (contact.avatar) db.getImageFromCid(contact.avatar).then(setAvatarImage)
-
-      setContact(contact)
-    })
+    const contact = db.getMe()
+    setContact(x => ({ ...x, ...contact }))
+    setAffinities(db.getMyAffinities())
+    if (contact.avatar) db.getImageFromCid(contact.avatar).then(setAvatarImage)
   }, [])
 
   const setInput = e => setContact({ ...contact, [e.target.name]: e.target.value })
-  const toggleAffinity = ({ name: affinityName }) => setContact(x => {
-    const foundAt = x.affinities.indexOf(affinityName)
-    const affinities = foundAt !== -1 ? x.affinities.filter((_, i) => foundAt !== i) : x.affinities.concat(affinityName)
-    return { ...x, affinities }
+  const toggleAffinity = ({ name: affinityName }) => setAffinities(x => {
+    const foundAt = affinities.indexOf(affinityName)
+    return foundAt !== -1 ? affinities.filter((_, i) => foundAt !== i) : affinities.concat(affinityName)
   })
   const updateAvatar = (e) => {
     const file = e.target.files[0]
@@ -50,7 +48,7 @@ const EditContact = ({ history }) => {
     if (updatedAvatar) {
       contact.avatar = await db.addImage(avatarImage, { width: 200, height: 200 })
     }
-    await db.updateMe(contact)
+    await db.updateMe(contact, affinities)
     history.push('/')
   }
 
@@ -64,7 +62,7 @@ const EditContact = ({ history }) => {
       </Fieldset>
 
       <Header fontSize='3' mb='1'>Affinities</Header>
-      <Affinities canEdit value={contact.affinities} onToggle={toggleAffinity} />
+      <Affinities canEdit value={affinities} onToggle={toggleAffinity} />
       <Button as='button' type='submit' block>Update</Button>
     </Form>
   )

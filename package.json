@@ -24,7 +24,8 @@
     "styled-system": "^4.0.8",
     "tweetnacl": "^1.0.1",
     "tweetnacl-util": "^0.15.0",
-    "username-generator": "^1.1.0"
+    "username-generator": "^1.1.0",
+    "vcards-js": "^2.10.0"
   },
   "scripts": {
     "start": "react-app-rewired start",

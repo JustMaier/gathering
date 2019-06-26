@@ -1,20 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Header } from '../components/UI'
 import { ContactList, ContactListItem } from '../components/ContactList'
 import db from '../db'
 
 const Contacts = () => {
-  const [contacts, setContacts] = useState([])
-  useEffect(() => {
-    const updateContacts = () => db.getContacts().then(setContacts)
-    db.my.connections.events.on('write', updateContacts)
-    updateContacts()
-
-    return () => {
-      db.my.connections.events.off('write', updateContacts)
-    }
-  }, [])
-
+  const [contacts] = useState(db.getContacts())
   if (contacts.length === 0) return null
 
   return (

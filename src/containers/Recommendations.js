@@ -5,16 +5,15 @@ import { MdSend } from 'react-icons/md'
 import db from '../db'
 
 const Recommendations = ({ ...props }) => {
-  const [recommendations, setRecommendations] = useState([])
+  const [recommendations, setRecommendations] = useState(db.getRecommendations())
   useEffect(() => {
     const updateRecommendations = () => setRecommendations(db.getRecommendations())
-    db.my.recommendations.events.on('write', updateRecommendations)
-    db.my.recommendations.events.on('replicated', updateRecommendations)
-    updateRecommendations()
+    db.gathering.events.on('write', updateRecommendations)
+    db.gathering.events.on('replicated', updateRecommendations)
 
     return () => {
-      db.my.recommendations.events.off('write', updateRecommendations)
-      db.my.recommendations.events.off('replicated', updateRecommendations)
+      db.gathering.events.off('write', updateRecommendations)
+      db.gathering.events.off('replicated', updateRecommendations)
     }
   }, [])
 
@@ -25,7 +24,15 @@ const Recommendations = ({ ...props }) => {
       <Header fontSize='3' mb='1'>Recommendations</Header>
 
       <ContactList>
-        {recommendations.map(x => <ContactListItem key={x.id} {...x} onApprove={() => db.sendRequest(x.id)} approveIcon={MdSend} onDecline={() => db.deleteRecommendation(x.id)} />)}
+        { recommendations.map(x =>
+          <ContactListItem
+            key={x.id}
+            {...x}
+            onApprove={() => db.sendRequest(x.id)}
+            approveIcon={MdSend}
+            onDecline={() => db.deleteRecommendation(x.id)}
+          />
+        )}
       </ContactList>
     </Box>
   )

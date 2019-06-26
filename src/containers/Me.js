@@ -1,19 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Box, CIDPhoto, Header, LinkButton, Text } from '../components/UI'
 import { MdEdit } from 'react-icons/md'
 import db from '../db'
 
 const Me = () => {
-  const [me, setMe] = useState(null)
-  useEffect(() => {
-    const updateMe = () => db.getMe().then(setMe)
-    db.gatherings.events.on('write', updateMe)
-    updateMe()
-
-    return () => {
-      db.gatherings.events.off('write', updateMe)
-    }
-  }, [])
+  const [me] = useState(db.getMe())
 
   if (!me) return null
   return (

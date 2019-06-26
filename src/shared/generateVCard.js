@@ -1,12 +1,14 @@
+import VCard from 'vcards-js'
+
 const generateVCard = (contact) => {
-  return `BEGIN:VCARD
-    VERSION:3.0
-    FN:${contact.name}
-    TEL;TYPE=work,voice:${contact.phone}
-    EMAIL;type=internet,pref:${contact.email}
-    ORG:${contact.organization}
-    UID:${contact.id}
-    END:VCARD`
+  const vCard = new VCard()
+
+  vCard.firstName = contact.name
+  if (contact.phone) vCard.workPhone = contact.phone
+  if (contact.organization) vCard.organization = contact.organization
+  if (contact.email) vCard.email = contact.email
+
+  return vCard.getFormattedString()
 }
 
 export default generateVCard

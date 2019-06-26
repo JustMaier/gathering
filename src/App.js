@@ -47,6 +47,9 @@ const App = () => {
       if (qs.g) {
         const key = await db.joinGathering(window.atob(qs.g))
         await db.activateGathering(key)
+        if (qs.m) {
+          await db.sendRequest(window.atob(qs.m))
+        }
         setLoading(false)
       } else if (activeGatheringKey) {
         await db.activateGathering(activeGatheringKey)

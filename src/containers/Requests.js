@@ -4,16 +4,15 @@ import { ContactList, ContactListItem } from '../components/ContactList'
 import db from '../db'
 
 const Requests = ({ ...props }) => {
-  const [requests, setRequests] = useState([])
+  const [requests, setRequests] = useState(db.getRequests())
   useEffect(() => {
-    const updateRequests = () => db.getRequests().then(setRequests)
-    db.my.connectionRequests.events.on('write', updateRequests)
-    db.my.connectionRequests.events.on('replicated', updateRequests)
-    updateRequests()
+    const updateRequests = () => setRequests(db.getRequests())
+    db.gathering.events.on('write', updateRequests)
+    db.gathering.events.on('replicated', updateRequests)
 
     return () => {
-      db.my.connectionRequests.events.off('write', updateRequests)
-      db.my.connectionRequests.events.off('replicated', updateRequests)
+      db.gathering.events.off('write', updateRequests)
+      db.gathering.events.off('replicated', updateRequests)
     }
   }, [])
 

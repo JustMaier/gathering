@@ -5,23 +5,26 @@ import Affinities from './Affinities'
 import { saveAs } from 'file-saver'
 import { ContactList, ContactListItem } from '../components/ContactList'
 import StatusIndicator from '../components/StatusIndicator'
-import { MdPhone, MdLocationCity, MdLocalOffer, MdEmail, MdCloudDownload } from 'react-icons/md'
+import { MdPhone, MdLocationCity, MdEmail, MdCloudDownload } from 'react-icons/md'
 import Recommender from '../components/Recommender'
 import db from '../db'
 import generateVCard from '../shared/generateVCard'
-import { STARS_LIMIT } from '../db/GatheringDB'
 
 const Contact = ({ history, match: { params: { id: contactId } } }) => {
   const [recommending, setRecommending] = useState(false)
-  const [contact, setContact] = useState(null)
+  const [contact, setContact] = useState(db.getContact(contactId))
   const [contacts, setContacts] = useState([])
   const [recommendations, setRecommendations] = useState({})
-
   useEffect(() => {
-    db.getContact(contactId).then(setContact)
+    const updateContact = () => setContact(db.getContact(contactId))
+    db.gathering.events.on('replicated', updateContact)
+
+    return () => {
+      db.gathering.events.off('replicated', updateContact)
+    }
   }, [])
   useEffect(() => {
-    if (recommending && contacts.length === 0) db.getContacts().then(setContacts)
+    if (recommending && contacts.length === 0) setContacts(db.getContacts())
   }, [recommending])
 
   const download = () => {
@@ -52,7 +55,7 @@ const Contact = ({ history, match: { params: { id: contactId } } }) => {
       <Box justifyContent='space-between'>
         <StatusIndicator isOnline={isOnline} />
         <Recommender contact={contact} />
-        <Stars count={contact.stars} onClick={db.my.starsSpent.value < STARS_LIMIT ? addStar : null} />
+        <Stars count={contact.stars} onClick={db.starsAvailable > 0 ? addStar : null} />
       </Box>
       <Box alignItems='center' justifyContent='center' mb={4} mt={2}>
         <CIDPhoto src={contact.avatar} alt={contact.name} />
