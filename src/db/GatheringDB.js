@@ -28,7 +28,7 @@ class GatheringDB extends EventEmitter {
         property: 'points'
       },
       {
-        name: 'Smoozer',
+        name: 'Schmoozer',
         property: 'requestsAccepted'
       },
       // {
