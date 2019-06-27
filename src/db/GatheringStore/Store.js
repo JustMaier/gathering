@@ -48,6 +48,9 @@ export default class GatheringStore extends Store {
       key
     })
   }
+  get size () {
+    return this._index._size
+  }
   /* #endregion */
 
   /* #region Members */

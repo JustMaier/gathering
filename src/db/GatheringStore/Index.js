@@ -185,13 +185,13 @@ export default class GatheringIndex {
     this._tables.score = {}
     this._tables.stars = {}
     this._tables.starsAvailable = {}
+    this._size = oplog.length
 
     oplog.values
       .slice()
       .reverse()
       .reduce((handled, { payload: { table, op, ...payload }, identity: { id: by } }) => {
         const reducer = reducers[table] || reducers.default
-        console.log(table, op, by, payload)
         reducer(this._tables[table], handled[table], { table, op, ...payload, by })
         scoreProcessor(this._tables.score, handled.scoreHistory, { table, op, ...payload, by })
         return handled
