@@ -11,7 +11,7 @@ const generateVCard = (contact, affinities, gathering = null, image = null) => {
   if (contact.email) vCard.email = contact.email
   if (contact.github) vCard.socialUrls['github'] = `https://github.com/${contact.github}`
   if (contact.twitter) vCard.socialUrls['twitter'] = `https://twitter.com/${contact.twitter}`
-  if (image) vCard.photo.embedFromString(image, 'JPEG')
+  if (image) vCard.photo.embedFromString(image.split('base64,').slice(1), 'JPEG')
   if (gathering) vCard.note = `Affinities: ${affinities.join(', ')}\nVia Gathering at ${gathering.name}: ${gathering.place}`
 
   return vCard.getFormattedString()
