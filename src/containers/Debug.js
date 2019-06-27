@@ -18,7 +18,6 @@ const Debug = () => {
 
   useEffect(() => {
     const updateIndicators = () => {
-      console.log('update indicitors')
       setIndicators({
         members: Object.keys(db.gathering.members).length,
         connections: sumArray(Object.values(db.gathering._tables.connections).map(x => Object.keys(x).length)),
@@ -29,7 +28,6 @@ const Debug = () => {
       })
     }
     const updatePeers = () => {
-      console.log('update peers')
       const peerIds = db.node.libp2p.peerBook.getAllArray().filter(x => x.isConnected()).map(x => x.id.toB58String())
       setPeers(peerIds)
     }

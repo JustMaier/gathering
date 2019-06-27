@@ -17,7 +17,7 @@ const Connect = ({ history }) => {
   const connect = async e => {
     e.preventDefault()
     setLoading(true)
-    const members = await db.queryMembers(x => x.id !== db.memberId && x.codename.trim().toLowerCase() === name.trim().toLowerCase())
+    const members = db.queryMembers(x => x.id !== db.memberId && x.codename.trim().toLowerCase() === name.trim().toLowerCase())
     if (members.length === 0) {
       setAlert({ message: 'We couldn\'t find anyone with that code name. Please check it and try again', variant: 'danger' })
     } else {

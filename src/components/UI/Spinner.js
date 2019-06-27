@@ -2,36 +2,53 @@ import React from 'react'
 import styled from 'styled-components/macro'
 import { space, color, size } from 'styled-system'
 
-export const Spinner = styled(p => (
-  <div className={p.className}>
-    <div />
-    <div />
+export const Spinner = styled(({ className, children }) => (
+  <div className={className}>
+    <div className='spinner'>
+      <div />
+      <div />
+    </div>
+    { children && <p className='message'>{children}</p>}
   </div>
 ))`
   ${space}
-  ${size}
 
-  position: relative;
-
-  div{
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    ${color}
-    opacity: 0.6;
-    position: absolute;
-    top: 0;
-    left: 0;
-    animation: bounce 2.0s infinite ease-in-out;
-
-    &:last-child{
-      animation-delay: -1.0s;
+  .spinner {
+    position: relative;
+    margin: 0 auto 10px;
+    ${size}
+  
+    div{
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      ${color}
+      opacity: 0.6;
+      position: absolute;
+      top: 0;
+      left: 0;
+      animation: bounce 2.0s infinite ease-in-out;
+  
+      &:last-child{
+        animation-delay: -1.0s;
+      }
     }
   }
+
+  .message {
+    text-align:center;
+    animation: blink 2.0s infinite ease-in-out;
+  }
+
 
   @keyframes bounce {
     0%, 100% { transform: scale(0.0) }
     50% { transform: scale(1.0) }
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: .3 }
+    50% { opacity: 1 }
   }
 `
 

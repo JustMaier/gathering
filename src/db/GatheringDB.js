@@ -57,9 +57,10 @@ class GatheringDB extends EventEmitter {
       config: {
         Addresses: {
           Swarm: [
-            '/dns4/ws-star.discovery.libp2p.io/tcp/443/wss/p2p-websocket-star'
+            '/dns4/signal.gthr.io/tcp/9090/ws/p2p-websocket-star'
           ]
-        }
+        },
+        Bootstrap: []
       }
     })
 
@@ -99,12 +100,15 @@ class GatheringDB extends EventEmitter {
   async activateGathering (key) {
     await this.appSettings.put('activeGathering', key)
     const { address, shareableKey, asymmetricKeyPair, ...rest } = this.gatherings.get(key)
+    this.emit('loading:message', 'Opening Gathering DB')
     this.gathering = await this.orbitdb.open(address, { sync: true })
+    this.emit('loading:message', 'Loading Gathering DB')
     await this.gathering.load()
 
     // Update our gatherings record if possible
     if (!rest.name && this.gathering.get('name')) {
-      this.gatherings.put(key, {
+      this.emit('loading:message', 'Updating Gathering Listing')
+      await this.gatherings.put(key, {
         address,
         shareableKey,
         asymmetricKeyPair,
@@ -120,7 +124,7 @@ class GatheringDB extends EventEmitter {
     // Load user profile
     this.my = { shareableKey, asymmetricKeyPair }
     if (this.gathering.me == null) {
-      console.log(this.gathering.all.end)
+      this.emit('loading:message', 'Creating your member record')
       if (new Date(this.gathering.all.end) < new Date()) {
         const err = new Error('This Gathering has ended')
         await this.gatherings.del(key)
@@ -136,17 +140,28 @@ class GatheringDB extends EventEmitter {
         codename,
         organization: '',
         avatar: null,
-        privateInfo: null
+        privateInfo: null,
+        peerId: this.peerInfo.id
       })
     }
 
-    // Prep awards
-    this.updateAwards()
+    // Add new peer addresses
+    if (!this.gathering.me.peerId) {
+      this.emit('loading:message', 'Adding your peer id')
+      await this.gathering.putProfile({
+        ...this.gathering.me,
+        peerId: this.peerInfo.id
+      })
+    }
 
     // Shareable address
     const encodedAddress = encodeURI(btoa(this.gathering.address.toString()))
     const encodedMemberId = encodeURI(btoa(this.memberId))
-    this.shareableAddress = `${this._options.locationBase}/?g=${encodedAddress}&m=${encodedMemberId}`
+    const encodedPeerId = encodeURI(this.gathering.me.peerId)
+    this.shareableAddress = `${this._options.locationBase}/?g=${encodedAddress}&m=${encodedMemberId}&p=${encodedPeerId}`
+
+    // Connect to members
+    this.connectToMembers()
 
     this.emit('gathering:activated', this.gathering.all)
   }
@@ -191,9 +206,19 @@ class GatheringDB extends EventEmitter {
     return key
   }
 
-  async joinGathering (address) {
+  async joinGathering (address, bootstrapPeerId = null) {
     const existing = Object.values(this.gatherings.all).find(x => x.address === address)
     if (existing) return existing.key
+
+    if (bootstrapPeerId) {
+      try {
+        this.emit('loading:message', 'Connecting to bootstrap')
+        await await this.connectToPeer(bootstrapPeerId)
+        console.log('connected bootstrap peer')
+      } catch (err) {
+        console.log('failed to connect bootstrap peer ' + bootstrapPeerId, err.message)
+      }
+    }
 
     const key = address.split('/').slice(3).join('')
     try {
@@ -241,18 +266,6 @@ class GatheringDB extends EventEmitter {
       your: ranks[a.name].find(x => x.id === this.memberId)
     }))
   }
-  async updateAwards (force = false) {
-    // TODO awards
-
-    // if (!force && this.listenerCount('awards:updated') === 0) return
-
-    // const nameMap = {}
-    // Object.keys(this.members.all).forEach(id => { nameMap[id] = this.members.all[id].name })
-
-    // this.awards = []
-    // this.awards = this.awardEngine.processEvents(this.events, nameMap)
-    // this.emit('awards:updated', this.awards)
-  }
   /* #endregion */
 
   /* #region IPFS */
@@ -275,6 +288,23 @@ class GatheringDB extends EventEmitter {
     } catch (err) {
       return '/img/placeholder.jpg'
     }
+  }
+
+  connectToPeer (peerId) {
+    return this.node.swarm.connect('/dns4/signal.gthr.io/tcp/9090/ws/p2p-websocket-star/ipfs/' + peerId)
+  }
+
+  async connectToMembers () {
+    const myPeerId = this.gathering.me.peerId
+    await Promise.all(Object.values(this.gathering.members).filter(x => x.peerId != null && x.peerId !== myPeerId).map(async ({ name, peerId }) => {
+      console.log('trying to connect to ' + name)
+      try {
+        await this.connectToPeer(peerId)
+        console.log('connected to ' + name)
+      } catch (err) {
+        console.log('failed to connect to ' + name, err.message)
+      }
+    }))
   }
   /* #endregion */
 
@@ -318,7 +348,7 @@ class GatheringDB extends EventEmitter {
   /* #endregion */
 
   /* #region Members */
-  async queryMembers (queryFn) {
+  queryMembers (queryFn) {
     return Object.values(this.gathering.members).filter(queryFn)
   }
   /* #endregion */

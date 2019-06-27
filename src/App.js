@@ -29,7 +29,8 @@ const routes = [
 ]
 
 const App = () => {
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState({ active: true, message: 'Starting IPFS' })
+  const updateLoading = (update) => setLoading(x => ({ ...x, ...update }))
   const [error, setError] = useState(null)
   const [gathering, setGathering] = useState(null)
   useEffect(() => {
@@ -51,6 +52,7 @@ const App = () => {
     }
     db.on('gathering:activated', onActivated)
     db.on('gathering:deactivated', onDeactivated)
+    db.on('loading:message', message => updateLoading({ message }))
     db.once('ready', async () => {
       const activeGatheringKey = db.appSettings.get('activeGathering')
 
@@ -58,18 +60,18 @@ const App = () => {
       const qs = queryString.parse(window.location.search)
       if (qs.g) {
         try {
-          const key = await db.joinGathering(window.atob(qs.g))
+          const key = await db.joinGathering(window.atob(qs.g), qs.p)
           await db.activateGathering(key)
           if (qs.m) sendRequest(window.atob(qs.m), 3)
-          setLoading(false)
+          updateLoading({ active: false })
         } catch (err) {
-          setLoading(false)
+          updateLoading({ active: false })
         }
       } else if (activeGatheringKey) {
         await db.activateGathering(activeGatheringKey)
-        setLoading(false)
+        updateLoading({ active: false })
       } else {
-        setLoading(false)
+        updateLoading({ active: false })
       }
     })
     db.on('error', (err) => setError(err.message))
@@ -87,7 +89,7 @@ const App = () => {
         <GlobalStyle />
         <Layout>
           {error && <Alert variant='danger' onClick={() => setError(null)}>{error}</Alert>}
-          { loading ? <Spinner />
+          { loading.active ? <Spinner>{loading.message}</Spinner>
             : <Switch>
               {routes
                 .filter(x => x.inGathering == null || x.inGathering === (gathering != null))
