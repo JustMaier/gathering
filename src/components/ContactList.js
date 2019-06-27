@@ -56,7 +56,7 @@ const ReviewableListGroupItem = styled.div`
   }
 `
 
-export const ContactListItem = ({ id, name, organization, avatar, stars, status, onClick = null, onApprove = null, onDecline = null, approveIcon: ApproveIcon = MdCheckCircle }) => {
+export const ContactListItem = ({ id, name, organization, avatar, stars, status, children, onClick = null, onApprove = null, onDecline = null, approveIcon: ApproveIcon = MdCheckCircle }) => {
   const content = (
     <React.Fragment>
       <CIDPhoto className='img' src={avatar} />
@@ -64,6 +64,7 @@ export const ContactListItem = ({ id, name, organization, avatar, stars, status,
         <Box flexDirection='column'>
           <Text fontWeight='800'>{name}</Text>
           <Text fontSize='1' color='muted'>{organization}</Text>
+          {children}
         </Box>
         {status === 'sending' && <Spinner size='40px' mt='0' mb='0' ml='4' />}
         {status === 'sent' && <Box color='primary' ml='4'><MdCheckCircle size='2em' /></Box>}

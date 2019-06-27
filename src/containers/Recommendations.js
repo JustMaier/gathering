@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Header, Box } from '../components/UI'
+import { Header, Box, Text } from '../components/UI'
 import { ContactList, ContactListItem } from '../components/ContactList'
 import db from '../db'
 
@@ -28,7 +28,9 @@ const Recommendations = ({ ...props }) => {
             key={x.id}
             {...x}
             onDecline={() => db.deleteRecommendation(x.id)}
-          />
+          >
+            <Text color='muted' fontSize='0' mt='1'>{x.by.join(', ')}</Text>
+          </ContactListItem>
         )}
       </ContactList>
     </Box>
