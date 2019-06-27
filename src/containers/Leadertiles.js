@@ -19,7 +19,7 @@ const TileContainer = styled(({ className, children }) => (
   display:flex;
   flex-direction:row;
   width:100%;
-  overflow-x: hidden;
+  overflow-x: auto;
   padding-bottom:10px;
   margin: 0 -${tileSettings.gutter};
   ${space}
@@ -129,13 +129,14 @@ const TilePage = styled.div`
 `
 
 const Leadertiles = () => {
-  const [awards, setAwards] = useState(db.awards || [])
+  const [awards, setAwards] = useState([])
   useEffect(() => {
-    db.on('awards:updated', setAwards)
-    db.updateAwards(true)
+    const updateAwards = () => setAwards(db.getAwards())
+    db.gathering.events.on('replicated', updateAwards)
+    updateAwards()
 
     return () => {
-      db.off('awards:updated', setAwards)
+      if (db.gathering) db.gathering.events.off('replicated', updateAwards)
     }
   }, [])
 

@@ -6,6 +6,7 @@ import { saveAs } from 'file-saver'
 import { ContactList, ContactListItem } from '../components/ContactList'
 import StatusIndicator from '../components/StatusIndicator'
 import { MdPhone, MdLocationCity, MdEmail, MdCloudDownload } from 'react-icons/md'
+import { FaTwitter, FaGithub } from 'react-icons/fa'
 import Recommender from '../components/Recommender'
 import db from '../db'
 import generateVCard from '../shared/generateVCard'
@@ -33,7 +34,7 @@ const Contact = ({ history, match: { params: { id: contactId } } }) => {
   }, [recommending])
 
   const download = async () => {
-    const blob = new Blob([generateVCard(contact, db.gathering.all, contact.avatar ? await db.getImageFromCid(contact.avatar) : null)], { type: 'text/vcard' })
+    const blob = new Blob([generateVCard(contact, affinities, db.gathering.all, contact.avatar ? await db.getImageFromCid(contact.avatar) : null)], { type: 'text/vcard' })
     saveAs(blob, `${contact.name}.vcf`)
   }
   const toggleRecommending = () => setRecommending(x => !x)
@@ -77,6 +78,8 @@ const Contact = ({ history, match: { params: { id: contactId } } }) => {
         {contact.email && <ListGroupItem as='a' href={`mailto:${contact.email}`}><MdEmail />{contact.email}</ListGroupItem>}
         {contact.phone && <ListGroupItem as='a' href={`tel:${contact.phone}`}><MdPhone />{contact.phone}</ListGroupItem>}
         {contact.location && <ListGroupItem as='div'><MdLocationCity />{contact.location}</ListGroupItem>}
+        {contact.github && <ListGroupItem as='div'><FaGithub />{contact.github}</ListGroupItem>}
+        {contact.twitter && <ListGroupItem as='div'><FaTwitter />{contact.twitter}</ListGroupItem>}
       </ListGroup>
       <Affinities value={affinities} mb='3' />
       <Button as='button' mb='3' block onClick={deleteContact} bg='danger'>Delete</Button>

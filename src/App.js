@@ -38,6 +38,15 @@ const App = () => {
     const onDeactivated = () => {
       setGathering(null)
     }
+    const sendRequest = async (memberId, attempts) => {
+      try {
+        await db.sendRequest(memberId)
+      } catch (err) {
+        attempts--
+        if (attempts > 0) sendRequest(memberId, attempts)
+        else setError('Failed to connect with the user you scanned. Please refresh to try again.')
+      }
+    }
     db.on('gathering:activated', onActivated)
     db.on('gathering:deactivated', onDeactivated)
     db.once('ready', async () => {
@@ -48,9 +57,7 @@ const App = () => {
       if (qs.g) {
         const key = await db.joinGathering(window.atob(qs.g))
         await db.activateGathering(key)
-        if (qs.m) {
-          await db.sendRequest(window.atob(qs.m))
-        }
+        if (qs.m) sendRequest(window.atob(qs.m), 3)
         setLoading(false)
       } else if (activeGatheringKey) {
         await db.activateGathering(activeGatheringKey)

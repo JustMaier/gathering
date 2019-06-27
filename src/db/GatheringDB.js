@@ -6,6 +6,7 @@ import resizeImage from '../shared/resizeImage'
 import * as symmetricEncryption from '../shared/symmetricEncryption'
 import * as asymmetricEncryption from '../shared/asymmetricEncryption'
 import { ConnectionStatus, RecommendationStatus } from './GatheringStore/Index'
+import cleanSocialUrls from '../shared/cleanSocialUrls'
 
 const slugify = (str, maxLength = 12) => str.toLowerCase().match(/([a-z0-9]+)/g).join('-').substring(0, maxLength)
 const btoa = str => window ? window.btoa(str) : str
@@ -20,6 +21,33 @@ class GatheringDB extends EventEmitter {
       locationBase: window ? window.location.origin : null,
       ...options
     }
+
+    this.awards = [
+      {
+        name: 'MVP',
+        property: 'points'
+      },
+      {
+        name: 'Smoozer',
+        property: 'requestsAccepted'
+      },
+      // {
+      //   name: 'Human Router',
+      //   property: 'recommendations'
+      // },
+      {
+        name: 'Cupid',
+        property: 'recommendationsAccepted'
+      }
+      // {
+      //   name: 'High Priest',
+      //   property: 'stars'
+      // },
+      // {
+      //   name: 'Oracle',
+      //   property: 'superMatches'
+      // }
+    ]
 
     this.node = new this.IPFS({
       repo: '/orbitdb/gathering',
@@ -124,7 +152,7 @@ class GatheringDB extends EventEmitter {
   }
 
   async createGathering (gathering) {
-    const key = slugify(gathering.name)
+    const key = slugify(gathering.name, 8) + '-' + new Date().getTime()
     const gatheringDb = await this.orbitdb.open(key, {
       ...this.publicOptions,
       type: 'gathering',
@@ -177,6 +205,25 @@ class GatheringDB extends EventEmitter {
   /* #endregion */
 
   /* #region Awards */
+  getAwards () {
+    const ranks = {}
+    this.awards.forEach(a => {
+      ranks[a.name] = Object.keys(this.gathering.score)
+        .map(id => ({
+          id,
+          name: this.gathering.members[id] ? this.gathering.members[id].name : '',
+          score: this.gathering.score[id][a.property]
+        }))
+        .sort((ma, mb) => mb.score - ma.score)
+        .map((x, rank) => ({ ...x, rank: rank + 1 }))
+    })
+
+    return this.awards.map(a => ({
+      name: a.name,
+      rank: ranks[a.name],
+      your: ranks[a.name].find(x => x.id === this.memberId)
+    }))
+  }
   async updateAwards (force = false) {
     // TODO awards
 
@@ -308,6 +355,7 @@ class GatheringDB extends EventEmitter {
     }
 
     // Update member record
+    cleanSocialUrls(unecryptedPrivateInfo)
     const privateInfo = symmetricEncryption.encrypt(unecryptedPrivateInfo, this.my.shareableKey)
     await this.gathering.putProfile({
       name: name.trim(),

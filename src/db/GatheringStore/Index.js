@@ -96,9 +96,9 @@ const pointValues = {
   request: -1,
   requestAccepted: 2,
   requestDeclined: -1,
-  recommendation: -1,
-  recommendationAccepted: 3,
-  recommendationDeclined: -2,
+  recommendation: 1,
+  recommendationAccepted: 1,
+  recommendationDeclined: -1,
   star: 3,
   superMatch: 4
 }
