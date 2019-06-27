@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Header, Box } from '../components/UI'
 import { ContactList, ContactListItem } from '../components/ContactList'
-import { MdSend } from 'react-icons/md'
 import db from '../db'
 
 const Recommendations = ({ ...props }) => {
@@ -28,8 +27,6 @@ const Recommendations = ({ ...props }) => {
           <ContactListItem
             key={x.id}
             {...x}
-            onApprove={() => db.sendRequest(x.id)}
-            approveIcon={MdSend}
             onDecline={() => db.deleteRecommendation(x.id)}
           />
         )}

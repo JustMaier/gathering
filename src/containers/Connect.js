@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Button, Text, Spinner, Header, Form, Fieldset, FloatLabelInput, Box, QR, Alert } from '../components/UI'
 import db from '../db'
 import Requests from './Requests'
@@ -6,26 +6,32 @@ import Recommendations from './Recommendations'
 
 const Connect = ({ history }) => {
   const [name, setName] = useState('')
+  const [myCodename, setMyCodename] = useState('')
   const [alert, setAlert] = useState({ message: null, variant: 'danger' })
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    setMyCodename(db.getMe().codename)
+  }, [])
 
   const connect = async e => {
     e.preventDefault()
     setLoading(true)
-    const members = await db.queryMembers(x => x.id !== db.memberId && x.name.trim().toLowerCase() === name.trim().toLowerCase())
+    const members = await db.queryMembers(x => x.id !== db.memberId && x.codename.trim().toLowerCase() === name.trim().toLowerCase())
     if (members.length === 0) {
-      setAlert({ message: 'We couldn\'t find anyone with that name. Please check the name and try again', variant: 'danger' })
+      setAlert({ message: 'We couldn\'t find anyone with that code name. Please check it and try again', variant: 'danger' })
     } else {
+      let success = true
       for (let i in members) {
         const member = members[i]
         try {
           await db.sendRequest(member.id)
         } catch (err) {
-          setAlert({ message: 'We had trouble sending your request, please refresh and try again.', variant: 'danger' })
+          success = false
         }
       }
       setName('')
-      setAlert({ message: 'Your request to connect has been sent', variant: 'success' })
+      if (success) setAlert({ message: 'Your request to connect has been sent', variant: 'success' })
     }
     setLoading(false)
   }
@@ -39,8 +45,9 @@ const Connect = ({ history }) => {
       <Requests mb='4' />
       <Form onSubmit={connect}>
         <Header>Connect</Header>
+        <Text color='muted' mt='2' mb='1'>Your codename is: <strong>{myCodename}</strong></Text>
         <Fieldset>
-          <FloatLabelInput name='name' value={name} label='Their Name' onChange={(e) => setName(e.target.value)} required />
+          <FloatLabelInput name='name' value={name} label='Their Code Name' onChange={(e) => setName(e.target.value)} required />
         </Fieldset>
         <Button as='button' type='submit' block>Connect</Button>
       </Form>

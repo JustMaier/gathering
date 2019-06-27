@@ -45,20 +45,20 @@ const Logo = styled.a`
 `
 
 const Navbar = () => {
-  const [inGathering, setInGathering] = useState(false)
+  const [gathering, setGathering] = useState(null)
   const [notificationCount, setNotificationCount] = useState(0)
   useEffect(() => {
     const updateNotificationCount = () => {
       setNotificationCount(db.getRecommendationCount() + db.getRequestsCount())
     }
     const onActivated = () => {
-      setInGathering(true)
+      setGathering({ ...db.gathering.all, end: new Date(db.gathering.all.end) })
       db.gathering.events.on('replicated', updateNotificationCount)
       db.gathering.events.on('write', updateNotificationCount)
       updateNotificationCount()
     }
     const onDeactivated = () => {
-      setInGathering(false)
+      setGathering(null)
     }
     db.on('gathering:activated', onActivated)
     db.on('gathering:deactivated', onDeactivated)
@@ -72,7 +72,7 @@ const Navbar = () => {
   return (
     <Nav>
       <Logo as={Link} to='/'><LogoSVG /></Logo>
-      {inGathering &&
+      {gathering != null && gathering.end > new Date() &&
         <LinkButton to='/connect' sm borderRadius='0 0 5px 5px' className='add'>
           <MdAddCircle size='1.5em' />
           {notificationCount ? <Badge>{notificationCount}</Badge> : null}

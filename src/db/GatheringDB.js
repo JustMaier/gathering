@@ -2,7 +2,7 @@ import { EventEmitter } from 'events'
 import GatheringStore from './GatheringStore/Store'
 import UsernameGenerator from 'username-generator'
 import resizeImage from '../shared/resizeImage'
-// import AwardEngine, { trackedEvents } from './AwardEngine'
+import TimeoutPromise from '../shared/TimeoutPromise'
 import * as symmetricEncryption from '../shared/symmetricEncryption'
 import * as asymmetricEncryption from '../shared/asymmetricEncryption'
 import { ConnectionStatus, RecommendationStatus } from './GatheringStore/Index'
@@ -121,10 +121,20 @@ class GatheringDB extends EventEmitter {
     // Load user profile
     this.my = { shareableKey, asymmetricKeyPair }
     if (this.gathering.me == null) {
+      console.log(this.gathering.all.end)
+      if (new Date(this.gathering.all.end) < new Date()) {
+        const err = new Error('This Gathering has ended')
+        await this.gatherings.del(key)
+        this.emit('error', err)
+        throw err
+      }
+
+      const codename = UsernameGenerator.generateUsername(' ')
       await this.gathering.putProfile({
         id: this.memberId,
         publicKey: asymmetricKeyPair.public,
-        name: UsernameGenerator.generateUsername(' '),
+        name: codename,
+        codename,
         organization: '',
         avatar: null,
         privateInfo: null
@@ -187,20 +197,28 @@ class GatheringDB extends EventEmitter {
     if (existing) return existing.key
 
     const key = address.split('/').slice(3).join('')
-    await this.gatherings.put(key, {
-      key,
-      address,
-      shareableKey: symmetricEncryption.generateKey(),
-      asymmetricKeyPair: asymmetricEncryption.generateKeyPair()
-    })
+    try {
+      await new TimeoutPromise(async (resolve, reject) => {
+        const gatheringDb = await this.orbitdb.open(address, { sync: true })
+        await gatheringDb.load()
+        gatheringDb.events.once('replicated', async () => {
+          await gatheringDb.close()
+          resolve()
+        })
+      }, 20000, 'Couldn\'t connect to gathering')
 
-    const gatheringDb = await this.orbitdb.open(address, { sync: true })
-    return new Promise(resolve => {
-      gatheringDb.events.on('replicated', async () => {
-        await gatheringDb.close()
-        resolve(key)
+      await this.gatherings.put(key, {
+        key,
+        address,
+        shareableKey: symmetricEncryption.generateKey(),
+        asymmetricKeyPair: asymmetricEncryption.generateKeyPair()
       })
-    })
+
+      return key
+    } catch (err) {
+      this.emit('error', err)
+      throw err
+    }
   }
   /* #endregion */
 
@@ -278,15 +296,24 @@ class GatheringDB extends EventEmitter {
 
   async acceptRequest (id) {
     await this.gathering.acceptConnection(id)
-    await this.sendRequest(id) // Handles the case where connection has already been sent
+    try {
+      await this.sendRequest(id) // Handles the case where connection has already been sent
+    } catch (err) {
+      // This is already handled sufficiently
+    }
   }
 
   declineRequest (id) {
     return this.gathering.declineConnection(id)
   }
 
-  sendRequest (id) {
-    return this.gathering.requestConnection(id, asymmetricEncryption.encrypt(this.my.asymmetricKeyPair.private, this.my.shareableKey, this.gathering.members[id].publicKey))
+  async sendRequest (id) {
+    try {
+      await this.gathering.requestConnection(id, asymmetricEncryption.encrypt(this.my.asymmetricKeyPair.private, this.my.shareableKey, this.gathering.members[id].publicKey))
+    } catch (err) {
+      this.emit('error', err)
+      throw err
+    }
   }
 
   /* #endregion */
@@ -341,7 +368,7 @@ class GatheringDB extends EventEmitter {
     return this.getContact(this.memberId)
   }
 
-  async updateMe ({ name, avatar, organization, ...unecryptedPrivateInfo }, affinities) {
+  async updateMe ({ name, avatar, organization, codename, ...unecryptedPrivateInfo }, affinities) {
     // Update affinityCounts
     const currentAffinities = this.gathering.myAffinities
     const affectedAffinities = [...new Set(currentAffinities.concat(affinities || []))]
@@ -361,6 +388,7 @@ class GatheringDB extends EventEmitter {
       name: name.trim(),
       organization,
       avatar,
+      codename: codename.trim(),
       publicKey: this.my.asymmetricKeyPair.public,
       privateInfo
     })
@@ -376,7 +404,7 @@ class GatheringDB extends EventEmitter {
     return Object.keys(this.gathering.affinities).map(name => {
       const affinity = this.gathering.affinities[name]
       return { ...affinity, name, memberCount: Object.keys(affinity.members).length }
-    }).sort((a, b) => a.memberCount > b.memberCount)
+    }).sort((a, b) => b.memberCount - a.memberCount)
   }
 
   getAffinitiesFor (id) {
@@ -413,7 +441,9 @@ class GatheringDB extends EventEmitter {
   }
 
   sendRecommendation (toId, forId) {
-    return this.gathering.sendRecommendation(toId, forId)
+    try {
+      return this.gathering.sendRecommendation(toId, forId)
+    } catch (err) { this.emit('error', err) }
   }
 
   deleteRecommendation (forId) {

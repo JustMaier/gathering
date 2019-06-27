@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { Button, Header } from '../components/UI'
+import { Button, Header, Box, Text } from '../components/UI'
+import { timeLeft } from '../shared/utility'
 import Me from './Me'
 import Contacts from './Contacts'
 import db from '../db'
@@ -14,7 +15,10 @@ const Gathering = () => {
 
   return (
     <React.Fragment>
-      <Header mt='0' mb='1' fontSize='2' fontWeight='normal' color='secondary'>{gathering.name}: {gathering.place}</Header>
+      <Box mt='0' mb='1'>
+        <Header fontSize='2' fontWeight='normal' color='secondary'>{gathering.name}: {gathering.place}</Header>
+        <Text ml='auto' color='muted'>{timeLeft(gathering.end) || 'Ended'}</Text>
+      </Box>
       <Me />
       <Leadertiles />
       <Contacts />

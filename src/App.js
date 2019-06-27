@@ -55,10 +55,14 @@ const App = () => {
       // Watch for join Gathering
       const qs = queryString.parse(window.location.search)
       if (qs.g) {
-        const key = await db.joinGathering(window.atob(qs.g))
-        await db.activateGathering(key)
-        if (qs.m) sendRequest(window.atob(qs.m), 3)
-        setLoading(false)
+        try {
+          const key = await db.joinGathering(window.atob(qs.g))
+          await db.activateGathering(key)
+          if (qs.m) sendRequest(window.atob(qs.m), 3)
+          setLoading(false)
+        } catch (err) {
+          setLoading(false)
+        }
       } else if (activeGatheringKey) {
         await db.activateGathering(activeGatheringKey)
         setLoading(false)

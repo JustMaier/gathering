@@ -77,6 +77,10 @@ export default class GatheringStore extends Store {
     return Object.keys(this._tables.connections).filter(k => k !== this.id && this._tables.connections[k][this.id])
   }
 
+  areConnected (fromId, toId) {
+    return this._tables.connections[fromId] ? this._tables.connections[fromId][toId] != null : false
+  }
+
   getConnection (toId) {
     return this.connections ? this.connections[toId] : null
   }
@@ -86,7 +90,8 @@ export default class GatheringStore extends Store {
   }
 
   async requestConnection (toId, encryptedShareKey) {
-    if (this.getRequest(toId)) return
+    if (toId === this.id) throw new Error('You can\'t connect with yourself')
+    if (this.getRequest(toId)) return // They're already connected
     if (this.getRecommendation(toId)) {
       await this.acceptRecommendation(toId)
     }
@@ -147,7 +152,8 @@ export default class GatheringStore extends Store {
   }
 
   sendRecommendation (toId, forId) {
-    if (this.getSentRecommendation(toId, forId)) return
+    if (this.getSentRecommendation(toId, forId)) throw new Error('You\'ve already recommended that person')
+    if (this.areConnected(toId, forId)) throw new Error('They are already connected')
 
     return this._addOperation({
       table: 'recommendations',

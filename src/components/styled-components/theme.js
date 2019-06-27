@@ -30,7 +30,8 @@ export const theme = {
     'right': '0 5px 5px 0',
     'left': '5px 0 0 5px',
     'bottom': '0 0 5px 5px',
-    'top': '5px 5px 0 0'
+    'top': '5px 5px 0 0',
+    'none': '0px'
   },
   shadows: {
     lg: '0px 3px 10px rgba(0,0,0,.3)',

@@ -76,11 +76,11 @@ export const ContactListItem = ({ id, name, organization, avatar, stars, status,
   else if (onApprove || onDecline) {
     return (
       <ReviewableListGroupItem>
-        {onDecline ? <Button className='decline' bg='danger' borderRadius='left' onClick={onDecline}><MdCancel size='1.75em' /></Button> : null}
+        {onDecline ? <Button className='decline' bg='danger' borderRadius='none' onClick={onDecline}><MdCancel size='1.75em' /></Button> : null}
         <ContactListGroupItem as='div' selectable={false}>
           {content}
         </ContactListGroupItem>
-        {onApprove ? <Button className='approve' bg='success' borderRadius='right' onClick={onApprove}><ApproveIcon size='1.75em' /></Button> : null}
+        {onApprove ? <Button className='approve' bg='success' borderRadius='none' onClick={onApprove}><ApproveIcon size='1.75em' /></Button> : null}
       </ReviewableListGroupItem>
     )
   } else return <ContactListGroupItem as={Link} to={'/contacts/' + id}>{content}</ContactListGroupItem>
