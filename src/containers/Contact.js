@@ -5,11 +5,12 @@ import Affinities from './Affinities'
 import { saveAs } from 'file-saver'
 import { ContactList, ContactListItem } from '../components/ContactList'
 import StatusIndicator from '../components/StatusIndicator'
-import { MdPhone, MdLocationCity, MdEmail, MdCloudDownload } from 'react-icons/md'
+import { MdPhone, MdLocationCity, MdEmail, MdCloudDownload, MdDelete } from 'react-icons/md'
 import { FaTwitter, FaGithub } from 'react-icons/fa'
 import Recommender from '../components/Recommender'
 import db from '../db'
 import generateVCard from '../shared/generateVCard'
+import Leadertiles from './Leadertiles'
 
 const Contact = ({ history, match: { params: { id: contactId } } }) => {
   const [recommending, setRecommending] = useState(false)
@@ -17,6 +18,7 @@ const Contact = ({ history, match: { params: { id: contactId } } }) => {
   const [contacts, setContacts] = useState([])
   const [affinities, setAffinities] = useState([])
   const [recommendations, setRecommendations] = useState({})
+  const [isOnline, setIsOnline] = useState(false)
   useEffect(() => {
     const updateContact = () => {
       setContact(db.getContact(contactId))
@@ -29,6 +31,11 @@ const Contact = ({ history, match: { params: { id: contactId } } }) => {
       db.gathering.events.off('replicated', updateContact)
     }
   }, [])
+  useEffect(() => {
+    if (!contact) return
+    const peers = db.node.libp2p.peerBook.getAllArray().filter(x => x.isConnected()).map(x => x.id.toB58String())
+    setIsOnline(peers.includes(contact.peerId))
+  }, [contact])
   useEffect(() => {
     if (recommending && contacts.length === 0) setContacts(db.getContacts())
   }, [recommending])
@@ -54,8 +61,6 @@ const Contact = ({ history, match: { params: { id: contactId } } }) => {
 
   if (!contact) { return <Spinner /> }
 
-  const isOnline = contact // && peers[contact.id]
-
   return (
     <div>
       <Box justifyContent='space-between'>
@@ -66,7 +71,10 @@ const Contact = ({ history, match: { params: { id: contactId } } }) => {
       <Box alignItems='center' justifyContent='center' mb={4} mt={2}>
         <CIDPhoto src={contact.avatar} alt={contact.name} />
       </Box>
-      <Box alignItems='center'>
+
+      <Leadertiles forId={contact.id} includeLeader={false} />
+
+      <Box mt='5' alignItems='center'>
         <Box flex='1' flexDirection='column'>
           <Header>{contact.name}</Header>
           <Text>{contact.organization}</Text>
@@ -82,8 +90,10 @@ const Contact = ({ history, match: { params: { id: contactId } } }) => {
         {contact.twitter && <ListGroupItem as='div'><FaTwitter />{contact.twitter}</ListGroupItem>}
       </ListGroup>
       <Affinities value={affinities} mb='3' />
-      <Button as='button' mb='3' block onClick={deleteContact} bg='danger'>Delete</Button>
-      <Button as='button' mb='4' block onClick={toggleRecommending}>Send Recommendation</Button>
+      <Box mb='4'>
+        <Button as='button' style={{ flex: 1 }} block onClick={toggleRecommending}>Send Recommendation</Button>
+        <Button as='button' ml='1' onClick={deleteContact} bg='danger' sm><MdDelete /></Button>
+      </Box>
       {recommending && (
         <ContactList mb='4'>
           {contacts.filter(x => x.id !== contact.id).map(x => <ContactListItem key={x.id} {...x} onClick={sendRecommendation} status={recommendations[x.id]} />)}

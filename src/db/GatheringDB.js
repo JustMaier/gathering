@@ -298,8 +298,7 @@ class GatheringDB extends EventEmitter {
 
     return this.awards.map(a => ({
       name: a.name,
-      rank: ranks[a.name],
-      your: ranks[a.name].find(x => x.id === this.memberId)
+      rank: ranks[a.name]
     }))
   }
   /* #endregion */

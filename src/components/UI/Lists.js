@@ -9,6 +9,9 @@ export const ListGroup = styled.div`
   overflow: hidden;
   background: ${_('list.bg')};
   box-shadow: 0px 1px 5px rgba(0,0,0,.3);
+  &:empty {
+    display: none
+  }
 `
 
 ListGroup.propTypes = {

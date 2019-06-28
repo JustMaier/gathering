@@ -13,6 +13,12 @@ export const GlobalStyle = createGlobalStyle`
   * {
     box-sizing:border-box;
   }
+  
+  html {
+    min-height: 100vh;
+    margin:0;
+    padding:0;
+  }
 
   body {
     font-family: 'Roboto', sans-serif;
@@ -22,7 +28,7 @@ export const GlobalStyle = createGlobalStyle`
     background-image: radial-gradient(circle farthest-side, #4d4d4d, #333);
     background-repeat: no-repeat;
     background-position: 50% 50%;
-    min-height:100vh;
+    min-height:100%;
     max-width:100vw;
     margin:0 auto;
     padding:3px ${p => p.theme.sizes.gutter} 0;

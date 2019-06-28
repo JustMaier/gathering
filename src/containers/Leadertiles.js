@@ -66,7 +66,7 @@ const Tile = styled(({ header, children, className }) => (
 
     .viewport {
       display: inline-flex;
-      animation: slide 10s ease infinite alternate;
+      ${p => p.children.filter(x => x != null).length > 1 ? `animation: slide 10s ease infinite alternate;` : null}
       tranform: translateZ(1);
       > div {
         width: ${tileSettings.width};
@@ -128,7 +128,7 @@ const TilePage = styled.div`
   }
 `
 
-const Leadertiles = () => {
+const Leadertiles = ({ forId, includeLeader = true }) => {
   const [awards, setAwards] = useState([])
   useEffect(() => {
     const updateAwards = () => setAwards(db.getAwards())
@@ -141,26 +141,36 @@ const Leadertiles = () => {
   }, [])
 
   if (!awards.length) return null
+
   return (
     <TileContainer mt='5'>
-      { awards.filter(x => x.rank.length > 0).map(award => (
-        <Tile header={award.name} key={award.name}>
-          <TilePage>
-            <Text className='score'>{award.your ? award.your.score : 0}</Text>
-            <Box className='holder'>
-              <Text className='rank'>{award.your ? getOrdinal(award.your.rank) : 'N/A'}</Text>
-              <Text className='name'>You</Text>
-            </Box>
-          </TilePage>
-          <TilePage>
-            <Text className='score'>{award.rank[0].score}</Text>
-            <Box className='holder'>
-              <Text className='rank'>{getOrdinal(award.rank[0].rank)}</Text>
-              <Text className='name'>{award.rank[0].name}</Text>
-            </Box>
-          </TilePage>
-        </Tile>
-      ))}
+      { awards.filter(x => x.rank.length > 0).map(award => {
+        let forIdRank
+        if (forId) forIdRank = award.rank.find(x => x.id === forId)
+
+        return (
+          <Tile header={award.name} key={award.name}>
+            { forIdRank ? (
+              <TilePage>
+                <Text className='score'>{forIdRank.score}</Text>
+                <Box className='holder'>
+                  <Text className='rank'>{getOrdinal(forIdRank.rank)}</Text>
+                  <Text className='name'>{forIdRank.name}</Text>
+                </Box>
+              </TilePage>
+            ) : null }
+            { includeLeader ? (
+              <TilePage>
+                <Text className='score'>{award.rank[0].score}</Text>
+                <Box className='holder'>
+                  <Text className='rank'>{getOrdinal(award.rank[0].rank)}</Text>
+                  <Text className='name'>{award.rank[0].name}</Text>
+                </Box>
+              </TilePage>
+            ) : null }
+          </Tile>
+        )
+      })}
     </TileContainer>
   )
 }

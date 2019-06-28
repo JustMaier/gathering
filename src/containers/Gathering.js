@@ -21,7 +21,7 @@ const Gathering = () => {
         <Text ml='auto' color='muted'>{timeLeft(gathering.end) || 'Ended'}</Text>
       </Box>
       <Me />
-      <Leadertiles />
+      <Leadertiles forId={db.memberId} />
       <Contacts />
       <Box mt='4' mb='5'>
         <Button as='button' sm onClick={async () => db.deactivateGathering()}>Close gathering</Button>
