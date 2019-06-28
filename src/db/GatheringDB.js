@@ -35,7 +35,7 @@ class GatheringDB extends EventEmitter {
         property: 'points'
       },
       {
-        name: 'Schmoozer',
+        name: 'Connections',
         property: 'requestsAccepted'
       },
       // {
@@ -43,7 +43,7 @@ class GatheringDB extends EventEmitter {
       //   property: 'recommendations'
       // },
       {
-        name: 'Cupid',
+        name: 'Matches',
         property: 'recommendationsAccepted'
       }
       // {
