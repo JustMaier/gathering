@@ -18,7 +18,8 @@ const Connect = ({ history }) => {
     e.preventDefault()
     setLoading(true)
     try {
-      const members = db.queryMembers(x => x.id !== db.memberId && x.codename.trim().toLowerCase() === name.trim().toLowerCase())
+      const codename = name.trim().toLowerCase()
+      const members = db.queryMembers(x => x.codename != null && x.codename.trim().toLowerCase() === codename)
       if (members.length === 0) {
         setAlert({ message: 'We couldn\'t find anyone with that code name. Please check it and try again', variant: 'danger' })
       } else {
