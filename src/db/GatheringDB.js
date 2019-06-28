@@ -113,6 +113,11 @@ class GatheringDB extends EventEmitter {
       this.emit('loading:progress', replicateProgressReader(this.gathering))
     })
 
+    let lastSize = this.gathering.size
+    this.gathering.events.on('replicated', () => {
+      if (this.gathering.size - lastSize > 10) this.gathering.saveSnapshot()
+    })
+
     let maxTotal = 0
     this.gathering.events.on('load.progress', (address, hash, entry, progress, total) => {
       maxTotal = Math.max.apply(null, [maxTotal, progress, 0])
@@ -121,7 +126,13 @@ class GatheringDB extends EventEmitter {
     })
 
     this.emit('loading:message', 'Loading Gathering DB')
-    await this.gathering.load()
+    try {
+      await this.gathering.loadFromSnapshot()
+    } catch (err) {
+      this.emit('error', 'Failed to load snapshot. Loading full log.')
+      await this.gathering.load()
+      await this.gathering.saveSnapshot()
+    }
 
     // Update our gatherings record if possible
     if (!rest.name && this.gathering.get('name')) {
@@ -250,6 +261,7 @@ class GatheringDB extends EventEmitter {
           this.emit('loading:progress', replicateProgressReader(gatheringDb))
         })
         gatheringDb.events.once('replicated', async () => {
+          window.localStorage[key] = await gatheringDb.saveSnapshot()
           await gatheringDb.close()
           resolve()
         })
