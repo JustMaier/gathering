@@ -29,7 +29,7 @@ const routes = [
 ]
 
 const App = () => {
-  const [loading, setLoading] = useState({ active: true, message: 'Starting IPFS' })
+  const [loading, setLoading] = useState({ active: true, message: 'Starting IPFS', progress: null })
   const updateLoading = (update) => setLoading(x => ({ ...x, ...update }))
   const [error, setError] = useState(null)
   const [gathering, setGathering] = useState(null)
@@ -50,9 +50,11 @@ const App = () => {
         else setError('Failed to connect with the user you scanned. Please refresh to try again.')
       }
     }
+    const updateProgress = progress => { updateLoading({ progress }) }
     db.on('gathering:activated', onActivated)
     db.on('gathering:deactivated', onDeactivated)
-    db.on('loading:message', message => updateLoading({ message }))
+    db.on('loading:message', message => updateLoading({ message, progress: null }))
+    db.on('loading:progress', updateProgress)
     db.once('ready', async () => {
       const activeGatheringKey = db.appSettings.get('activeGathering')
 
@@ -73,6 +75,7 @@ const App = () => {
       } else {
         updateLoading({ active: false })
       }
+      db.off('loading:progress', updateProgress)
     })
     db.on('error', (err) => setError(err.message))
 
@@ -89,7 +92,7 @@ const App = () => {
         <GlobalStyle />
         <Layout>
           {error && <Alert variant='danger' onClick={() => setError(null)}>{error}</Alert>}
-          { loading.active ? <Spinner>{loading.message}</Spinner>
+          { loading.active ? <Spinner>{loading.message} { loading.progress && (loading.progress + '%')}</Spinner>
             : <Switch>
               {routes
                 .filter(x => x.inGathering == null || x.inGathering === (gathering != null))

@@ -56,7 +56,7 @@ const Connect = ({ history }) => {
         </Fieldset>
         <Button as='button' type='submit' block>Connect</Button>
       </Form>
-      <Box flexDirection='column'>
+      <Box flexDirection='column' mb='5'>
         <Text mt='5' color='muted' fontSize='1' textAlign='center'>Not in the gathering yet? Scan this QR code!</Text>
         <QR mt='2' mb='4' link={db.shareableAddress} />
       </Box>

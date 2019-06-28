@@ -23,7 +23,7 @@ const Gathering = () => {
       <Me />
       <Leadertiles />
       <Contacts />
-      <Box mt='4'>
+      <Box mt='4' mb='5'>
         <Button as='button' sm onClick={async () => db.deactivateGathering()}>Close gathering</Button>
         <LinkButton ml='auto' sm to='/debug'><MdSettings /></LinkButton>
       </Box>

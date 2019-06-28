@@ -12,6 +12,11 @@ const signalServer = '/dns4/signal.gthr.io/tcp/9090/wss/p2p-websocket-star'
 
 const slugify = (str, maxLength = 12) => str.toLowerCase().match(/([a-z0-9]+)/g).join('-').substring(0, maxLength)
 const btoa = str => window ? window.btoa(str) : str
+const replicateProgressReader = (db) => {
+  const current = Math.max(db._replicationStatus.progress, db._oplog.length)
+  const total = db._replicationStatus.max
+  return (total === 0 ? null : ((current / total) * 100).toFixed(0))
+}
 
 class GatheringDB extends EventEmitter {
   constructor (IPFS, OrbitDB, options = {}) {
@@ -104,6 +109,17 @@ class GatheringDB extends EventEmitter {
     const { address, shareableKey, asymmetricKeyPair, ...rest } = this.gatherings.get(key)
     this.emit('loading:message', 'Opening Gathering DB')
     this.gathering = await this.orbitdb.open(address, { sync: true })
+    this.gathering.events.on('replicate.progress', () => {
+      this.emit('loading:progress', replicateProgressReader(this.gathering))
+    })
+
+    let maxTotal = 0
+    this.gathering.events.on('load.progress', (address, hash, entry, progress, total) => {
+      maxTotal = Math.max.apply(null, [maxTotal, progress, 0])
+      total = Math.max.apply(null, [progress, maxTotal, total, entry.clock.time, 0])
+      this.emit('loading:progress', ((maxTotal / total) * 100).toFixed(0))
+    })
+
     this.emit('loading:message', 'Loading Gathering DB')
     await this.gathering.load()
 
@@ -219,14 +235,20 @@ class GatheringDB extends EventEmitter {
         console.log('connected bootstrap peer')
       } catch (err) {
         console.log('failed to connect bootstrap peer ' + bootstrapPeerId, err.message)
+        this.emit('error', new Error('Couldn\'t connect to bootstrap peer'))
+        throw err
       }
     }
 
     const key = address.split('/').slice(3).join('')
     try {
-      this.emit('loading:message', 'Replicating DB')
+      this.emit('loading:message', 'Finding DB')
       await new TimeoutPromise(async (resolve, reject) => {
         const gatheringDb = await this.orbitdb.open(address, { sync: true })
+        this.emit('loading:message', 'Replicating DB')
+        gatheringDb.events.on('replicate.progress', () => {
+          this.emit('loading:progress', replicateProgressReader(gatheringDb))
+        })
         gatheringDb.events.once('replicated', async () => {
           await gatheringDb.close()
           resolve()

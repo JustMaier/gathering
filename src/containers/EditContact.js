@@ -64,7 +64,7 @@ const EditContact = ({ history }) => {
 
       <Header fontSize='3' mb='1'>Affinities</Header>
       <Affinities canEdit value={affinities} onToggle={toggleAffinity} />
-      <Button as='button' type='submit' block>Update</Button>
+      <Button mb='5' as='button' type='submit' block>Update</Button>
     </Form>
   )
 }
