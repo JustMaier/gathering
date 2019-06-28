@@ -17,21 +17,25 @@ const Connect = ({ history }) => {
   const connect = async e => {
     e.preventDefault()
     setLoading(true)
-    const members = db.queryMembers(x => x.id !== db.memberId && x.codename.trim().toLowerCase() === name.trim().toLowerCase())
-    if (members.length === 0) {
-      setAlert({ message: 'We couldn\'t find anyone with that code name. Please check it and try again', variant: 'danger' })
-    } else {
-      let success = true
-      for (let i in members) {
-        const member = members[i]
-        try {
-          await db.sendRequest(member.id)
-        } catch (err) {
-          success = false
+    try {
+      const members = db.queryMembers(x => x.id !== db.memberId && x.codename.trim().toLowerCase() === name.trim().toLowerCase())
+      if (members.length === 0) {
+        setAlert({ message: 'We couldn\'t find anyone with that code name. Please check it and try again', variant: 'danger' })
+      } else {
+        let success = true
+        for (let i in members) {
+          const member = members[i]
+          try {
+            await db.sendRequest(member.id)
+          } catch (err) {
+            success = false
+          }
         }
+        setName('')
+        if (success) setAlert({ message: 'Your request to connect has been sent', variant: 'success' })
       }
-      setName('')
-      if (success) setAlert({ message: 'Your request to connect has been sent', variant: 'success' })
+    } catch (err) {
+      setAlert({ message: err.message, variant: 'danger' })
     }
     setLoading(false)
   }

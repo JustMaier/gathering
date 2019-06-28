@@ -224,9 +224,9 @@ class GatheringDB extends EventEmitter {
 
     const key = address.split('/').slice(3).join('')
     try {
+      this.emit('loading:message', 'Replicating DB')
       await new TimeoutPromise(async (resolve, reject) => {
         const gatheringDb = await this.orbitdb.open(address, { sync: true })
-        await gatheringDb.load()
         gatheringDb.events.once('replicated', async () => {
           await gatheringDb.close()
           resolve()
@@ -293,7 +293,7 @@ class GatheringDB extends EventEmitter {
   }
 
   connectToPeer (peerId) {
-    return this.node.swarm.connect(signalServer + peerId)
+    return this.node.swarm.connect(signalServer + '/ipfs/' + peerId)
   }
 
   async connectToMembers () {
