@@ -8,7 +8,7 @@ import * as asymmetricEncryption from '../shared/asymmetricEncryption'
 import { ConnectionStatus, RecommendationStatus } from './GatheringStore/Index'
 import cleanSocialUrls from '../shared/cleanSocialUrls'
 
-const signalServer = '/dns4/ws-star.discovery.libp2p.io/tcp/443/wss/p2p-websocket-star'
+const signalServer = '/dns4/signal.gthr.io/tcp/9090/wss/p2p-websocket-star'
 
 const slugify = (str, maxLength = 12) => str.toLowerCase().match(/([a-z0-9]+)/g).join('-').substring(0, maxLength)
 const btoa = str => window ? window.btoa(str) : str
