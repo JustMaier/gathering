@@ -36,7 +36,8 @@ const reducers = {
   },
   connections: (target, handled, { op, to, by, value }) => {
     setupStores([handled, target], [to, by])
-    if (handled[by][to] !== 'merge') {
+    if (handled[to][by] === true) return
+    else if (handled[by][to] !== 'merge') {
       if (op === 'ACCEPT') {
         target[by][to] = { status: ConnectionStatus.accepted }
         handled[by][to] = 'merge'
@@ -47,7 +48,7 @@ const reducers = {
         target[by][to] = { status: ConnectionStatus.deleted }
         handled[by][to] = 'merge'
       }
-    } else if (handled[to][by] === true) return
+    }
 
     if (op === 'PUT') {
       if (handled[to][by] === 'merge') target[to][by] = { ...value, ...target[to][by] }

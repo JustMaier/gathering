@@ -3,7 +3,7 @@ import { ReactComponent as LogoSVG } from './logo.svg'
 import styled from 'styled-components/macro'
 import { Link } from 'react-router-dom'
 import { rgba, math } from 'polished'
-import { LinkButton, Badge } from '../UI'
+import { LinkButton, Badge, Spinner } from '../UI'
 import { MdAddCircle } from 'react-icons/md'
 import db from '../../db'
 
@@ -47,6 +47,7 @@ const Logo = styled.a`
 const Navbar = () => {
   const [gathering, setGathering] = useState(null)
   const [notificationCount, setNotificationCount] = useState(0)
+  const [progress, setProgress] = useState(null)
   useEffect(() => {
     const updateNotificationCount = () => {
       setNotificationCount(db.getRecommendationCount() + db.getRequestsCount())
@@ -62,6 +63,9 @@ const Navbar = () => {
     }
     db.on('gathering:activated', onActivated)
     db.on('gathering:deactivated', onDeactivated)
+    db.on('loading:progress', (progress) => {
+      setProgress(parseInt(progress))
+    })
 
     return () => {
       db.off('gathering:activated', onActivated)
@@ -72,6 +76,7 @@ const Navbar = () => {
   return (
     <Nav>
       <Logo as={Link} to='/'><LogoSVG /></Logo>
+      { progress && progress !== 100 ? <Spinner right mt='0' mb='0'>{progress}%</Spinner> : null}
       {gathering != null && gathering.end > new Date() &&
         <LinkButton to='/connect' sm borderRadius='0 0 5px 5px' className='add'>
           <MdAddCircle size='1.5em' />

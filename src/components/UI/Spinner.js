@@ -1,5 +1,5 @@
 import React from 'react'
-import styled from 'styled-components/macro'
+import styled, { css } from 'styled-components/macro'
 import { space, color, size } from 'styled-system'
 
 export const Spinner = styled(({ className, children }) => (
@@ -12,6 +12,7 @@ export const Spinner = styled(({ className, children }) => (
   </div>
 ))`
   ${space}
+  
 
   .spinner {
     position: relative;
@@ -34,6 +35,19 @@ export const Spinner = styled(({ className, children }) => (
       }
     }
   }
+
+  ${p => p.right && css`
+    display:flex;
+    align-items:center;
+    .spinner {
+      width:30px;
+      height:30px;
+      margin:0 10px 0 0;
+    }
+    .message {
+      margin: 0;
+    }
+  `}
 
   .message {
     text-align:center;

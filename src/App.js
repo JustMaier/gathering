@@ -56,7 +56,7 @@ const App = () => {
     db.on('loading:message', message => updateLoading({ message, progress: null }))
     db.on('loading:progress', updateProgress)
     db.once('ready', async () => {
-      const activeGatheringKey = db.appSettings.get('activeGathering')
+      const activeGatheringKey = window.localStorage.activeGathering
 
       // Watch for join Gathering
       const qs = queryString.parse(window.location.search)

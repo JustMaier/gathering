@@ -272,4 +272,15 @@ export default class GatheringStore extends Store {
     })
   }
   /* #endregion */
+
+  saveSnapshot () {
+    window.localStorage[this.dbname] = JSON.stringify(this._index._tables)
+  }
+  loadFromSnapshot () {
+    if (window.localStorage[this.dbname]) {
+      this._tables = this._index._tables = JSON.parse(window.localStorage[this.dbname])
+    } else {
+      throw new Error('No snapshot')
+    }
+  }
 }

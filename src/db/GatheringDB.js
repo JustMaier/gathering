@@ -64,7 +64,7 @@ class GatheringDB extends EventEmitter {
       config: {
         Addresses: {
           Swarm: [
-            signalServer
+            // signalServer
           ]
         },
         Bootstrap: []
@@ -105,7 +105,7 @@ class GatheringDB extends EventEmitter {
   }
 
   async activateGathering (key) {
-    await this.appSettings.put('activeGathering', key)
+    window.localStorage.activeGathering = key
     const { address, shareableKey, asymmetricKeyPair, ...rest } = this.gatherings.get(key)
     this.emit('loading:message', 'Opening Gathering DB')
     this.gathering = await this.orbitdb.open(address, { sync: true })
@@ -128,11 +128,15 @@ class GatheringDB extends EventEmitter {
     this.emit('loading:message', 'Loading Gathering DB')
     try {
       await this.gathering.loadFromSnapshot()
+      this.gathering.load()
     } catch (err) {
       this.emit('error', 'Failed to load snapshot. Loading full log.')
       await this.gathering.load()
       await this.gathering.saveSnapshot()
     }
+
+    // Connect to members
+    setInterval(() => this.connectToMembers(), 30000)
 
     // Update our gatherings record if possible
     if (!rest.name && this.gathering.get('name')) {
@@ -189,15 +193,12 @@ class GatheringDB extends EventEmitter {
     const encodedPeerId = encodeURI(this.gathering.me.peerId)
     this.shareableAddress = `${this._options.locationBase}/?g=${encodedAddress}&m=${encodedMemberId}&p=${encodedPeerId}`
 
-    // Connect to members
-    this.connectToMembers()
-
     this.emit('gathering:activated', this.gathering.all)
   }
 
   async deactivateGathering () {
     await this.gathering.close()
-    await this.appSettings.del('activeGathering')
+    delete window.localStorage.activeGathering
     this.gathering = null
     this.my = {}
     this.keys = {}
