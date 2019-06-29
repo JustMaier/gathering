@@ -64,7 +64,7 @@ class GatheringDB extends EventEmitter {
       config: {
         Addresses: {
           Swarm: [
-            // signalServer
+            signalServer
           ]
         },
         Bootstrap: []
