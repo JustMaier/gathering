@@ -39,13 +39,13 @@ const reducers = {
     if (handled[to][by] === true) return
     else if (handled[by][to] !== 'merge') {
       if (op === 'ACCEPT') {
-        target[by][to] = { status: ConnectionStatus.accepted }
+        target[by][to] = { ...(target[by][to] || {}), status: ConnectionStatus.accepted }
         handled[by][to] = 'merge'
       } else if (op === 'DECLINE') {
-        target[by][to] = { status: ConnectionStatus.declined }
+        target[by][to] = { ...(target[by][to] || {}), status: ConnectionStatus.declined }
         handled[by][to] = 'merge'
       } else if (op === 'DELETE') {
-        target[by][to] = { status: ConnectionStatus.deleted }
+        target[by][to] = { ...(target[by][to] || {}), status: ConnectionStatus.deleted }
         handled[by][to] = 'merge'
       }
     }
