@@ -113,10 +113,8 @@ class GatheringDB extends EventEmitter {
       this.emit('loading:progress', replicateProgressReader(this.gathering))
     })
 
-    let lastSize = this.gathering.size
-    this.gathering.events.on('replicated', () => {
-      if (this.gathering.size - lastSize > 10) this.gathering.saveSnapshot()
-    })
+    this.gathering.events.on('replicated', () => this.gathering.saveSnapshot())
+    this.gathering.events.on('write', () => this.gathering.saveSnapshot())
 
     let maxTotal = 0
     this.gathering.events.on('load.progress', (address, hash, entry, progress, total) => {
