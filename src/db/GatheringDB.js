@@ -172,6 +172,7 @@ class GatheringDB extends EventEmitter {
         organization: '',
         avatar: null,
         privateInfo: null,
+        includeRank: true,
         peerId: this.peerInfo.id
       })
     }
@@ -286,6 +287,7 @@ class GatheringDB extends EventEmitter {
     const ranks = {}
     this.awards.forEach(a => {
       ranks[a.name] = Object.keys(this.gathering.score)
+        .filter(id => this.gathering.members[id] && this.gathering.members[id].includeRank !== false)
         .map(id => ({
           id,
           name: this.gathering.members[id] ? this.gathering.members[id].name : '',
@@ -299,6 +301,13 @@ class GatheringDB extends EventEmitter {
       name: a.name,
       rank: ranks[a.name]
     }))
+  }
+
+  async toggleAwardInclusion () {
+    await this.gathering.putProfile({
+      ...this.gathering.me,
+      includeRank: this.gathering.me.includeRank != null ? !this.gathering.me.includeRank : false
+    })
   }
   /* #endregion */
 
