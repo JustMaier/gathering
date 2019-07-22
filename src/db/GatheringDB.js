@@ -440,7 +440,7 @@ class GatheringDB extends EventEmitter {
     return this.getContact(this.memberId)
   }
 
-  async updateMe ({ name, avatar, organization, codename, ...unecryptedPrivateInfo }, affinities) {
+  async updateMe ({ name, avatar, organization, codename, peerId, ...unecryptedPrivateInfo }, affinities) {
     // Update affinityCounts
     const currentAffinities = this.gathering.myAffinities
     const affectedAffinities = [...new Set(currentAffinities.concat(affinities || []))]
@@ -460,6 +460,7 @@ class GatheringDB extends EventEmitter {
       name: name.trim(),
       organization,
       avatar,
+      peerId,
       codename: codename.trim(),
       publicKey: this.my.asymmetricKeyPair.public,
       privateInfo
