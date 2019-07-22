@@ -7,6 +7,7 @@ import * as symmetricEncryption from '../shared/symmetricEncryption'
 import * as asymmetricEncryption from '../shared/asymmetricEncryption'
 import { ConnectionStatus, RecommendationStatus } from './GatheringStore/Index'
 import cleanSocialUrls from '../shared/cleanSocialUrls'
+import { receiveJson, sendJson } from '../shared/jsonTransfer'
 
 const signalServer = '/dns4/signal.gthr.io/tcp/9090/wss/p2p-websocket-star'
 
@@ -80,6 +81,14 @@ class GatheringDB extends EventEmitter {
     this.orbitdb = await this.OrbitDB.createInstance(this.node, {})
     this.memberId = this.orbitdb.identity.id
 
+    // Protocols
+    // ==================
+    this.node.libp2p.handle('/gathering/1.0.0/snapshot', (protocol, conn) => {
+      sendJson(conn, this.gathering._index._tables)
+    })
+
+    // Orbit DB Options
+    // ==================
     this.defaultOptions = {
       accessController: { write: [this.memberId] }
     }
@@ -113,7 +122,6 @@ class GatheringDB extends EventEmitter {
       this.emit('loading:progress', replicateProgressReader(this.gathering))
     })
 
-    this.gathering.events.on('replicated', () => this.gathering.saveSnapshot())
     this.gathering.events.on('write', () => this.gathering.saveSnapshot())
 
     let maxTotal = 0
@@ -126,11 +134,14 @@ class GatheringDB extends EventEmitter {
     this.emit('loading:message', 'Loading Gathering DB')
     try {
       await this.gathering.loadFromSnapshot()
-      this.gathering.load()
+      this.gathering.load().then(() => {
+        this.gathering.events.on('replicated', () => this.gathering.saveSnapshot())
+      })
     } catch (err) {
       this.emit('error', 'Failed to load snapshot. Loading full log.')
       await this.gathering.load()
       await this.gathering.saveSnapshot()
+      this.gathering.events.on('replicated', () => this.gathering.saveSnapshot())
     }
 
     // Connect to members
@@ -239,11 +250,13 @@ class GatheringDB extends EventEmitter {
     const existing = Object.values(this.gatherings.all).find(x => x.address === address)
     if (existing) return existing.key
 
+    const key = address.split('/').slice(3).join('')
     if (bootstrapPeerId) {
       try {
         this.emit('loading:message', 'Connecting to bootstrap')
-        await await this.connectToPeer(bootstrapPeerId)
-        console.log('connected bootstrap peer')
+        await this.connectToPeer(bootstrapPeerId)
+        this.emit('loading:message', 'Getting snapshot')
+        window.localStorage[key] = JSON.stringify(await this.getSnapshot(bootstrapPeerId))
       } catch (err) {
         console.log('failed to connect bootstrap peer ' + bootstrapPeerId, err.message)
         this.emit('error', new Error('Couldn\'t connect to bootstrap peer'))
@@ -251,20 +264,12 @@ class GatheringDB extends EventEmitter {
       }
     }
 
-    const key = address.split('/').slice(3).join('')
     try {
       this.emit('loading:message', 'Finding DB')
       await new TimeoutPromise(async (resolve, reject) => {
         const gatheringDb = await this.orbitdb.open(address, { sync: true })
-        this.emit('loading:message', 'Replicating DB')
-        gatheringDb.events.on('replicate.progress', () => {
-          this.emit('loading:progress', replicateProgressReader(gatheringDb))
-        })
-        gatheringDb.events.once('replicated', async () => {
-          window.localStorage[key] = await gatheringDb.saveSnapshot()
-          await gatheringDb.close()
-          resolve()
-        })
+        await gatheringDb.close()
+        resolve()
       }, 20000, 'Couldn\'t connect to gathering')
 
       await this.gatherings.put(key, {
@@ -335,6 +340,16 @@ class GatheringDB extends EventEmitter {
 
   connectToPeer (peerId) {
     return this.node.swarm.connect(signalServer + '/ipfs/' + peerId)
+  }
+
+  async getSnapshot (peerId) {
+    const conn = await new Promise((resolve, reject) => this.node.libp2p.dialProtocol(signalServer + '/ipfs/' + peerId, '/gathering/1.0.0/snapshot', (err, conn) => {
+      if (err) reject(err)
+      else resolve(conn)
+    }))
+
+    const snapshot = await receiveJson(conn)
+    return snapshot
   }
 
   async connectToMembers () {
