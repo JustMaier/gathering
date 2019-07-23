@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import { space, size, boxShadow, borderRadius, border } from 'styled-system'
 import db from '../../db'
+import placeholderImage from './placeholder.jpg'
 
 export const Image = styled(({ src, alt, className }) => (
   <div className={className}>
@@ -42,10 +43,12 @@ Photo.defaultProps = {
 }
 
 const CIDPhotoCache = {}
-export const CIDPhoto = ({ src: cid, placeholder = '/img/placeholder.jpg', ...props }) => {
+export const CIDPhoto = ({ src: cid, placeholder = placeholderImage, ...props }) => {
   const [src, setSrc] = useState(CIDPhotoCache[cid] || placeholder)
   useEffect(() => {
     db.getImageFromCid(cid).then(src => {
+      if (!src) return
+
       CIDPhotoCache[cid] = src
       setSrc(CIDPhotoCache[cid])
     })

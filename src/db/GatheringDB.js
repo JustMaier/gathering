@@ -334,7 +334,7 @@ class GatheringDB extends EventEmitter {
       const base64 = files[0].content.toString('base64')
       return 'data:image/jpeg;base64,' + base64
     } catch (err) {
-      return '/img/placeholder.jpg'
+      return null
     }
   }
 
