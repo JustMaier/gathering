@@ -186,6 +186,7 @@ export default class GatheringIndex {
     this._tables.stars = {}
     this._tables.starsAvailable = {}
     this._size = oplog.length
+    this._raw = []
 
     oplog.values
       .slice()
@@ -194,6 +195,7 @@ export default class GatheringIndex {
         const reducer = reducers[table] || reducers.default
         reducer(this._tables[table], handled[table], { table, op, ...payload, by })
         scoreProcessor(this._tables.score, handled.scoreHistory, { table, op, ...payload, by })
+        this._raw.push({ table, op, payload, by })
         return handled
       }, {
         gathering: {},

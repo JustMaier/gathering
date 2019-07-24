@@ -15,6 +15,7 @@ import EditContact from './containers/EditContact'
 import Contact from './containers/Contact'
 import CreateGathering from './containers/CreateGathering'
 import Debug from './containers/Debug'
+import Log from './containers/Log'
 import { Spinner, Alert } from './components/UI'
 import db from './db'
 
@@ -22,6 +23,7 @@ const routes = [
   { path: '/', component: Gatherings, exact: true, inGathering: false },
   { path: '/', component: Gathering, exact: true, inGathering: true },
   { path: '/debug', component: Debug, exact: true, inGathering: true },
+  { path: '/debug/log', component: Log, exact: true, inGathering: true },
   { path: '/edit', component: EditContact, exact: true, inGathering: true },
   { path: '/connect', component: Connect, exact: true, inGathering: true },
   { path: '/contacts/:id', component: Contact, exact: true, inGathering: true },
