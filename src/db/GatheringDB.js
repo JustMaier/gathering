@@ -34,19 +34,19 @@ class GatheringDB extends EventEmitter {
       {
         name: 'MVP',
         property: 'points'
-      },
-      {
-        name: 'Connections',
-        property: 'requestsAccepted'
-      },
+      }
+      // {
+      //   name: 'Connections',
+      //   property: 'requestsAccepted'
+      // },
       // {
       //   name: 'Human Router',
       //   property: 'recommendations'
       // },
-      {
-        name: 'Matches',
-        property: 'recommendationsAccepted'
-      }
+      // {
+      //   name: 'Matches',
+      //   property: 'recommendationsAccepted'
+      // }
       // {
       //   name: 'High Priest',
       //   property: 'stars'
