@@ -1,5 +1,6 @@
 import Store from 'orbit-db-store'
 import GatheringIndex, { ConnectionStatus, RecommendationStatus } from './Index'
+import LocalStorageStore from '../LocalStorageStore'
 
 export default class GatheringStore extends Store {
   constructor (ipfs, id, dbname, options = {}) {
@@ -9,6 +10,7 @@ export default class GatheringStore extends Store {
     })
     this._type = 'gathering'
     this._tables = this._index._tables
+    this._notes = new LocalStorageStore(dbname + '_notes')
     this.id = this.identity.id
   }
 
@@ -270,6 +272,20 @@ export default class GatheringStore extends Store {
       op: 'DEL_MEMBER',
       name
     })
+  }
+  /* #endregion */
+
+  /* #region Notes */
+  get notes () {
+    return this._notes.all
+  }
+
+  getNotesFor (id) {
+    return this._notes.get(id) || ''
+  }
+
+  setNotesFor (id, notes) {
+    this._notes.put(id, notes)
   }
   /* #endregion */
 

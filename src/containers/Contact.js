@@ -1,11 +1,11 @@
 /* global Blob */
 import React, { useState, useEffect } from 'react'
-import { ListGroup, ListGroupItem, Button, Header, Spinner, Stars, Text, Box, CIDPhoto } from '../components/UI'
+import { ListGroup, ListGroupItem, Button, Header, Spinner, Stars, Text, Box, CIDPhoto, FloatLabelInput } from '../components/UI'
 import Affinities from './Affinities'
 import { saveAs } from 'file-saver'
 import { ContactList, ContactListItem } from '../components/ContactList'
 import StatusIndicator from '../components/StatusIndicator'
-import { MdPhone, MdLocationCity, MdEmail, MdCloudDownload, MdDelete } from 'react-icons/md'
+import { MdPhone, MdLocationCity, MdEmail, MdCloudDownload, MdDelete, MdSave } from 'react-icons/md'
 import { FaTwitter, FaGithub } from 'react-icons/fa'
 import Recommender from '../components/Recommender'
 import db from '../db'
@@ -17,11 +17,13 @@ const Contact = ({ history, match: { params: { id: contactId } } }) => {
   const [contact, setContact] = useState(null)
   const [contacts, setContacts] = useState([])
   const [affinities, setAffinities] = useState([])
+  const [notes, setNotes] = useState('')
   const [recommendations, setRecommendations] = useState({})
   const [isOnline, setIsOnline] = useState(false)
   useEffect(() => {
     const updateContact = () => {
       setContact(db.getContact(contactId))
+      setNotes(db.getNotesFor(contactId))
       setAffinities(db.getAffinitiesFor(contactId))
     }
     db.gathering.events.on('replicated', updateContact)
@@ -41,7 +43,7 @@ const Contact = ({ history, match: { params: { id: contactId } } }) => {
   }, [recommending])
 
   const download = async () => {
-    const blob = new Blob([generateVCard(contact, affinities, db.gathering.all, contact.avatar ? await db.getImageFromCid(contact.avatar) : null)], { type: 'text/vcard' })
+    const blob = new Blob([generateVCard(contact, notes, affinities, db.gathering.all, contact.avatar ? await db.getImageFromCid(contact.avatar) : null)], { type: 'text/vcard' })
     saveAs(blob, `${contact.name}.vcf`)
   }
   const toggleRecommending = () => setRecommending(x => !x)
@@ -57,6 +59,9 @@ const Contact = ({ history, match: { params: { id: contactId } } }) => {
     setRecommendations(x => ({ ...x, [recommendedContactId]: 'sending' }))
     await db.sendRecommendation(contactId, recommendedContactId)
     setRecommendations(x => ({ ...x, [recommendedContactId]: 'sent' }))
+  }
+  const saveNotes = () => {
+    db.setNotesFor(contactId, notes)
   }
 
   if (!contact) { return <Spinner /> }
@@ -90,6 +95,12 @@ const Contact = ({ history, match: { params: { id: contactId } } }) => {
         {contact.twitter && <ListGroupItem as='div'><FaTwitter />{contact.twitter}</ListGroupItem>}
       </ListGroup>
       <Affinities value={affinities} mb='3' />
+
+      <Box mb='4'>
+        <FloatLabelInput inputAs='textarea' name='notes' label='Notes' value={notes} onChange={(e) => setNotes(e.target.value)} />
+        <Button as='button' onClick={saveNotes} borderRadius='right'><MdSave /></Button>
+      </Box>
+
       <Box mb='4'>
         <Button as='button' style={{ flex: 1 }} block onClick={toggleRecommending}>Send Recommendation</Button>
         <Button as='button' ml='1' onClick={deleteContact} bg='danger' sm><MdDelete /></Button>

@@ -8,6 +8,7 @@ import * as asymmetricEncryption from '../shared/asymmetricEncryption'
 import { ConnectionStatus, RecommendationStatus } from './GatheringStore/Index'
 import cleanSocialUrls from '../shared/cleanSocialUrls'
 import { receiveJson, sendJson } from '../shared/jsonTransfer'
+import LocalStorageStore from './LocalStorageStore'
 
 const signalServer = '/dns4/signal.gthr.io/tcp/9090/wss/p2p-websocket-star'
 
@@ -98,11 +99,7 @@ class GatheringDB extends EventEmitter {
 
     // Gatherings
     // ==================
-    this.gatherings = await this.orbitdb.kvstore('gatherings', { replicate: false })
-    await this.gatherings.load()
-
-    this.appSettings = await this.orbitdb.kvstore('appSettings', { replicate: false })
-    await this.appSettings.load()
+    this.gatherings = new LocalStorageStore('gatherings')
 
     this.emit('ready', this)
     this.ready = true
@@ -150,7 +147,7 @@ class GatheringDB extends EventEmitter {
     // Update our gatherings record if possible
     if (!rest.name && this.gathering.get('name')) {
       this.emit('loading:message', 'Updating Gathering Listing')
-      await this.gatherings.put(key, {
+      this.gatherings.put(key, {
         address,
         shareableKey,
         asymmetricKeyPair,
@@ -169,7 +166,7 @@ class GatheringDB extends EventEmitter {
       this.emit('loading:message', 'Creating your member record')
       if (new Date(this.gathering.all.end) < new Date()) {
         const err = new Error('This Gathering has ended')
-        await this.gatherings.del(key)
+        this.gatherings.del(key)
         this.emit('error', err)
         throw err
       }
@@ -233,7 +230,7 @@ class GatheringDB extends EventEmitter {
       await gatheringDb.put(key, gathering[key])
     }
 
-    await this.gatherings.put(key, {
+    this.gatherings.put(key, {
       key,
       name: gathering.name,
       end: gathering.end,
@@ -272,7 +269,7 @@ class GatheringDB extends EventEmitter {
         resolve()
       }, 20000, 'Couldn\'t connect to gathering')
 
-      await this.gatherings.put(key, {
+      this.gatherings.put(key, {
         key,
         address,
         shareableKey: symmetricEncryption.generateKey(),
@@ -486,6 +483,16 @@ class GatheringDB extends EventEmitter {
     return this.gathering.deleteConnection(id)
   }
   /* #endregion Contacts */
+
+  /* #region Notes */
+  getNotesFor (id) {
+    return this.gathering.getNotesFor(id) || ''
+  }
+
+  setNotesFor (id, notes) {
+    return this.gathering.setNotesFor(id, notes)
+  }
+  /* #endregion */
 
   /* #region Affinities */
   getAffinities () {
