@@ -97,8 +97,7 @@ const Contact = ({ history, match: { params: { id: contactId } } }) => {
       <Affinities value={affinities} mb='3' />
 
       <Box mb='4'>
-        <FloatLabelInput inputAs='textarea' name='notes' label='Notes' value={notes} onChange={(e) => setNotes(e.target.value)} />
-        <Button as='button' onClick={saveNotes} borderRadius='right'><MdSave /></Button>
+        <FloatLabelInput inputAs='textarea' name='notes' label='Notes' value={notes} onChange={(e) => setNotes(e.target.value)} onBlur={saveNotes} />
       </Box>
 
       <Box mb='4'>

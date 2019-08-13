@@ -47,7 +47,7 @@ Fieldset.defaultProps = {
 
 const FormGroup = (props) => (
   <div className={props.className}>
-    <Input as={props.inputAs || 'input'} id={props.name} type={props.type || 'text'} name={props.name} placeholder=' ' required={props.required} value={props.value} onChange={props.onChange} />
+    <Input as={props.inputAs || 'input'} id={props.name} type={props.type || 'text'} name={props.name} placeholder=' ' required={props.required} value={props.value} onChange={props.onChange} onBlur={props.onBlur} />
     <label htmlFor={props.name}>{props.label || props.name}</label>
   </div>
 )
