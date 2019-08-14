@@ -12,7 +12,9 @@ const generateVCard = (contact, notes = '', affinities = [], gathering = null, i
   if (contact.github) vCard.socialUrls['github'] = `https://github.com/${contact.github}`
   if (contact.twitter) vCard.socialUrls['twitter'] = `https://twitter.com/${contact.twitter}`
   if (image) vCard.photo.embedFromString(image.split('base64,').slice(1), 'JPEG')
-  if (gathering) vCard.note = `Via Gathering at ${gathering.name}: ${gathering.place}. Affinities: ${affinities.join(', ')}. ${notes}`
+  if (gathering) vCard.note = `Via Gathering at ${gathering.name}: ${gathering.place}.`
+  if (affinities && affinities.length) vCard.note += `Affinities: ${affinities.join(', ')}.`
+  if (notes !== '') vCard.note = notes + ' | ' + vCard.note
 
   return vCard.getFormattedString()
 }
