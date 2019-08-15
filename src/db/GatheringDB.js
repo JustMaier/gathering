@@ -99,8 +99,13 @@ class GatheringDB extends EventEmitter {
 
     // Gatherings
     // ==================
+    this.appSettings = new LocalStorageStore('appSettings')
     this.gatherings = new LocalStorageStore('gatherings')
-    if (!this.gatherings.get('migrated')) {
+    if (this.gatherings.get('migrated')) {
+      this.appSettings.put('migrated', true)
+      this.gatherings.del('migrated')
+    }
+    if (!this.appSettings.get('migrated')) {
       console.log('migrating')
       this.emit('loading:message', 'Migrating Gatherings')
       const oldGatherings = await this.orbitdb.kvstore('gatherings', { replicated: false })
@@ -108,7 +113,7 @@ class GatheringDB extends EventEmitter {
       Object.keys(oldGatherings.all).forEach(k => {
         this.gatherings.put(k, oldGatherings.all[k])
       })
-      this.gatherings.put('migrated', true)
+      this.appSettings.put('migrated', true)
       await oldGatherings.close()
     }
 
