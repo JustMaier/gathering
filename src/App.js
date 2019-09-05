@@ -18,28 +18,35 @@ import Debug from './containers/Debug'
 import { Spinner, Alert } from './components/UI'
 import db from './db'
 
+const GatheringStatus = {
+  Pending: 0,
+  Onboarding: 1,
+  Active: 2
+}
 const routes = [
-  { path: '/', component: Gatherings, exact: true, inGathering: false },
-  { path: '/', component: Gathering, exact: true, inGathering: true },
-  { path: '/debug', component: Debug, exact: true, inGathering: true },
-  { path: '/edit', component: EditContact, exact: true, inGathering: true },
-  { path: '/connect', component: Connect, exact: true, inGathering: true },
-  { path: '/contacts/:id', component: Contact, exact: true, inGathering: true },
-  { path: '/gatherings/create', component: CreateGathering, inGathering: false }
+  { path: '/', component: Gatherings, exact: true, status: GatheringStatus.Pending },
+  { path: '/', component: EditContact, exact: true, status: GatheringStatus.Onboarding },
+  { path: '/', component: Gathering, exact: true, status: GatheringStatus.Active },
+  { path: '/debug', component: Debug, exact: true, status: GatheringStatus.Active },
+  { path: '/edit', component: EditContact, exact: true, status: GatheringStatus.Active },
+  { path: '/connect', component: Connect, exact: true, status: GatheringStatus.Active },
+  { path: '/contacts/:id', component: Contact, exact: true, status: GatheringStatus.Active },
+  { path: '/gatherings/create', component: CreateGathering, status: GatheringStatus.Pending }
 ]
 
 const App = () => {
   const [loading, setLoading] = useState({ active: true, message: 'Starting IPFS', progress: null })
   const updateLoading = (update) => setLoading(x => ({ ...x, ...update }))
   const [error, setError] = useState(null)
-  const [gathering, setGathering] = useState(null)
+  const [status, setStatus] = useState(GatheringStatus.Pending)
   useEffect(() => {
     // Watch for Gathering Loading
     const onActivated = async (gathering) => {
-      setGathering(gathering)
+      const { name, codename } = db.getMe()
+      setStatus(!name || name === codename ? GatheringStatus.Onboarding : GatheringStatus.Active)
     }
     const onDeactivated = () => {
-      setGathering(null)
+      setStatus(GatheringStatus.Pending)
     }
     const sendRequest = async (memberId, attempts) => {
       try {
@@ -64,7 +71,6 @@ const App = () => {
         try {
           const key = await db.joinGathering(window.atob(qs.g), qs.p)
           await db.activateGathering(key)
-          if (qs.m) sendRequest(window.atob(qs.m), 3)
           updateLoading({ active: false })
         } catch (err) {
           updateLoading({ active: false })
@@ -75,6 +81,12 @@ const App = () => {
       } else {
         updateLoading({ active: false })
       }
+
+      db.once('gathering:onboarded', () => {
+        if (qs.m) sendRequest(window.atob(qs.m), 3)
+        setStatus(GatheringStatus.Active)
+      })
+
       db.off('loading:progress', updateProgress)
     })
     db.on('error', (err) => setError(err.message))
@@ -95,7 +107,7 @@ const App = () => {
           { loading.active ? <Spinner>{loading.message} { loading.progress && (loading.progress + '%')}</Spinner>
             : <Switch>
               {routes
-                .filter(x => x.inGathering == null || x.inGathering === (gathering != null))
+                .filter(x => x.status === status)
                 .map(x => (
                   <Route
                     key={x.path}

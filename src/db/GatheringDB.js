@@ -191,7 +191,7 @@ class GatheringDB extends EventEmitter {
       await this.gathering.putProfile({
         id: this.memberId,
         publicKey: asymmetricKeyPair.public,
-        name: codename,
+        name: null,
         codename,
         organization: '',
         avatar: null,
@@ -469,6 +469,8 @@ class GatheringDB extends EventEmitter {
   }
 
   async updateMe ({ name, avatar, organization, codename, peerId, ...unecryptedPrivateInfo }, affinities) {
+    const isOnboarding = this.gathering.me.name == null && name != null
+
     // Update affinityCounts
     const currentAffinities = this.gathering.myAffinities
     const affectedAffinities = [...new Set(currentAffinities.concat(affinities || []))]
@@ -493,6 +495,9 @@ class GatheringDB extends EventEmitter {
       publicKey: this.my.asymmetricKeyPair.public,
       privateInfo
     })
+
+    // Trigger onboarding
+    if (isOnboarding) this.emit('gathering:onboarded')
   }
 
   deleteContact (id) {

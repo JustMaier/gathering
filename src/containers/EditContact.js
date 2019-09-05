@@ -6,7 +6,6 @@ import db from '../db'
 
 const defaultFields = [
   { name: 'name', label: 'Name', required: true },
-  { name: 'codename', label: 'Code Name', required: true },
   { name: 'organization', label: 'Organization' },
   { name: 'email', label: 'Email' },
   { name: 'github', label: 'Github' },
