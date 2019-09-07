@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { Header, ListGroup, ListGroupItem, Button, Box, LinkButton } from '../components/UI'
+import { Header, ListGroup, ListGroupItem, Button } from '../components/UI'
 import db from '../db'
-import { MdComputer, MdCheck, MdReceipt } from 'react-icons/md'
+import { MdComputer, MdCheck } from 'react-icons/md'
 
 const sumArray = arr => arr.reduce((total, cur) => total + cur, 0)
 
