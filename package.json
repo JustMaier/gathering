@@ -5,7 +5,7 @@
   "dependencies": {
     "browser-image-resizer": "^2.0.1",
     "file-saver": "^2.0.1",
-    "ipfs": "^0.36.4",
+    "ipfs": "^0.66.1",
     "json-stable-stringify": "^1.0.1",
     "md5-hash": "^1.0.1",
     "orbit-db": "^0.21.3",
